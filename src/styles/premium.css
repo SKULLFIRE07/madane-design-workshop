@@ -280,7 +280,7 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: clamp(72px, 9vh, 120px) 0 clamp(56px, 7vh, 96px);
+  padding: clamp(48px, 6vh, 96px) 0 clamp(40px, 5vh, 72px);
 }
 
 /* ---- header: eyebrow + index counter ---- */
@@ -338,7 +338,10 @@
   --g: 1; /* greyscale amount, driven by JS (1 = mono, 0 = full colour) */
   position: relative;
   flex: 0 0 auto;
-  width: clamp(180px, 19vw, 300px);
+  /* card height = width x 4/3, then JS zooms the centre to ~1.45. Cap the
+     width by viewport HEIGHT too (min(19vw, 30vh)) so on short/wide screens
+     the hero plate shrinks instead of clipping or shoving the caption off. */
+  width: clamp(180px, min(19vw, 30vh), 300px);
   cursor: pointer;
   will-change: transform, opacity;
   outline: none;
@@ -399,9 +402,9 @@
 .pg__caption {
   position: relative;
   z-index: 3;
-  margin-top: clamp(20px, 3vh, 40px);
+  margin-top: clamp(14px, 2.4vh, 34px);
   padding: 0 clamp(20px, 5vw, 80px);
-  min-height: clamp(96px, 12vh, 150px);
+  min-height: clamp(80px, 10vh, 130px);
 }
 
 .pg__caption-meta {
@@ -434,7 +437,9 @@
 
 .pg__caption-name {
   font-family: var(--font-display);
-  font-size: clamp(40px, 6.4vw, 96px);
+  /* vh-capped so the name never grows tall enough to fall off a short
+     viewport while keeping its large scale on normal screens. */
+  font-size: clamp(36px, min(6.4vw, 8.4vh), 96px);
   font-weight: 400;
   line-height: 0.94;
   letter-spacing: -0.02em;
