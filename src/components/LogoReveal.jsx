@@ -14,14 +14,13 @@ let hasPlayed = false
  *
  * Beats:
  *  0. Black. Faint blueprint grid + concentric rings drift in, masked.
- *  1. IGNITION — a 1px scan-line ignites from centre and sweeps full-width,
- *     "printing" the mark as it passes (the line is the clock for arrival).
- *  2. ASSEMBLY — the real mark arrives as two split halves snapping together,
- *     scaling down from large, with a hard ink-stamp shutter punch.
- *  3. WORDMARK — "madane" resolves letter-by-letter from a mask (kinetic
+ *  1. SLAM — the authentic /assets/logo-white.png brush mark stamps straight
+ *     in (scale punch + rotation kick + back-overshoot) as two shockwave rings
+ *     burst out from the impact. No clean vector mark — the real brush only.
+ *  2. WORDMARK — "madane" resolves letter-by-letter from a mask (kinetic
  *     serif), then the disciplines line masks up beneath it.
- *  4. HOLD — a confident beat. Everything settles, dead still.
- *  5. FINALE — the mark scales up / engulfs, the hairline completes, and the
+ *  3. HOLD — a confident beat. Everything settles, dead still.
+ *  4. FINALE — the mark scales up / engulfs, the hairline completes, and the
  *     whole black overlay curtain-wipes upward, revealing the page +
  *     onComplete().
  *
@@ -71,19 +70,17 @@ export function LogoReveal({ onComplete }) {
       // --- INITIAL STATE -------------------------------------------------
       tl.set('.lr__bg', { opacity: 0 })
         .set('.lr__ring', { scale: 0.7, opacity: 0 })
-        .set('.lr__mark', { scale: 1.6, opacity: 0, filter: 'blur(6px)' })
-        .set('.lr__half--l', { xPercent: -22, clipPath: 'inset(0 50% 0 0)' })
-        .set('.lr__half--r', { xPercent: 22, clipPath: 'inset(0 0 0 50%)' })
-        .set('.lr__scan', { scaleX: 0, opacity: 0, transformOrigin: 'center center' })
-        .set('.lr__shutter', { scaleX: 0, transformOrigin: 'left center' })
+        .set('.lr__mark', { opacity: 1 })
+        .set('.lr__brush', { opacity: 1, '--paint': '0deg' })
         .set('.lr__word', { opacity: 1 })
         .set(chars, { yPercent: 115, rotate: 4 })
+        .set('.lr__wordsub', { yPercent: 80, opacity: 0 })
         .set('.lr__tag-i', { yPercent: 120 })
         .set('.lr__bar-fill', { scaleX: 0, transformOrigin: 'left center' })
         .set('.lr__corner', { opacity: 0, y: 8 })
 
       // The hairline progress bar tracks the whole timeline (no digits).
-      tl.to('.lr__bar-fill', { scaleX: 1, duration: 4.1, ease: 'none' }, 0)
+      tl.to('.lr__bar-fill', { scaleX: 1, duration: 3.6, ease: 'none' }, 0)
 
       // --- 0 · BLUEPRINT ATMOSPHERE drifts in ----------------------------
       tl.to('.lr__bg', { opacity: 1, duration: 1.2, ease: 'power2.out' }, 0)
@@ -92,49 +89,35 @@ export function LogoReveal({ onComplete }) {
         }, 0.1)
         .to('.lr__corner', { opacity: 1, y: 0, duration: 0.9, ease: 'power3.out' }, 0.25)
 
-      // --- 1 · IGNITION scan-line prints the mark ------------------------
-      tl.to('.lr__scan', { opacity: 1, duration: 0.12 }, 0.42)
-        .to('.lr__scan', { scaleX: 1, duration: 0.5, ease: 'power3.inOut' }, 0.46)
-        // the mark is revealed in the wake of the scan-line
-        .to('.lr__mark', { opacity: 1, filter: 'blur(0px)', duration: 0.5, ease: 'power2.out' }, 0.6)
-        .to('.lr__scan', { opacity: 0, duration: 0.3, ease: 'power2.out' }, 0.96)
+      // --- 1 · PAINT THE BRUSH MARK --------------------------------------
+      // a conic mask sweeps clockwise from 12 o'clock, revealing the REAL
+      // hand-painted brush mark as if a brush draws the circle around it
+      // (the 'm', knocked out of the disc, emerges with it).
+      tl.to('.lr__brush', {
+          '--paint': '360deg', duration: 1.5, ease: 'power2.inOut',
+        }, 0.5)
 
-      // --- 2 · ASSEMBLY — halves snap, scale settles, ink-stamp punch ----
-      tl.to('.lr__half--l', {
-          xPercent: 0, clipPath: 'inset(0 0% 0 0)',
-          duration: 1.35, ease: 'power4.inOut',
-        }, 0.66)
-        .to('.lr__half--r', {
-          xPercent: 0, clipPath: 'inset(0 0 0 0%)',
-          duration: 1.35, ease: 'power4.inOut',
-        }, 0.66)
-        .to('.lr__mark', { scale: 1, duration: 1.5, ease: 'expo.out' }, 0.66)
-
-      // hard ink-stamp shutter punch across the mark (difference blend)
-      tl.to('.lr__shutter', { scaleX: 1, duration: 0.26, ease: 'power3.in' }, 0.92)
-        .set('.lr__shutter', { transformOrigin: 'right center' })
-        .to('.lr__shutter', { scaleX: 0, duration: 0.34, ease: 'power3.out' }, 1.2)
-
-      // --- 3 · WORDMARK resolves letter-by-letter, then disciplines ------
+      // --- 2 · WORDMARK 'madane' resolves, then 'design workshop' --------
       tl.to(chars, {
           yPercent: 0, rotate: 0,
           duration: 1.0, ease: 'power4.out',
           stagger: { each: 0.045, from: 'start' },
-        }, 1.5)
-        .to('.lr__tag-i', { yPercent: 0, duration: 0.95, ease: 'power4.out' }, 2.0)
+        }, 1.55)
+        .to('.lr__wordsub', { yPercent: 0, opacity: 1, duration: 0.8, ease: 'power3.out' }, 2.05)
+        .to('.lr__tag-i', { yPercent: 0, duration: 0.95, ease: 'power4.out' }, 2.3)
 
-      // --- 4 · HOLD — a confident, dead-still beat ------------------------
-      tl.to({}, { duration: 0.55 }, 2.95)
+      // --- 3 · HOLD — a confident, dead-still beat ------------------------
+      tl.to({}, { duration: 0.4 }, 3.25)
 
-      // --- 5 · FINALE — engulf, then curtain-wipe up to hero -------------
+      // --- 4 · FINALE — engulf, then curtain-wipe up to hero -------------
       tl.to('.lr__ring', {
           scale: 1.35, opacity: 0, duration: 0.9, ease: 'power2.in', stagger: 0.05,
-        }, 3.4)
-        .to('.lr__bg', { opacity: 0, duration: 0.7, ease: 'power2.in' }, 3.4)
+        }, 3.6)
+        .to('.lr__bg', { opacity: 0, duration: 0.7, ease: 'power2.in' }, 3.6)
         .to('.lr__mark', {
           scale: isMobile ? 1.12 : 1.06, y: -18, duration: 0.7, ease: 'power2.inOut',
-        }, 3.42)
-        .to('.lr__mark, .lr__word, .lr__tag', { opacity: 0, duration: 0.5, ease: 'power2.in' }, '<0.18')
+        }, 3.62)
+        .to('.lr__mark, .lr__wordmark, .lr__tag', { opacity: 0, duration: 0.5, ease: 'power2.in' }, '<0.18')
         .to('.lr__corner, .lr__bar', { opacity: 0, duration: 0.4 }, '<')
         .to('.lr', {
           clipPath: 'inset(0 0 100% 0)',
@@ -167,19 +150,14 @@ export function LogoReveal({ onComplete }) {
 
       <div className="lr__stage">
         <div className="lr__mark">
-          {/* split-reveal halves of the real brush mark */}
-          <div className="lr__half lr__half--l">
-            <img src="/assets/logo-white.png" alt="" draggable="false" />
-          </div>
-          <div className="lr__half lr__half--r">
-            <img src="/assets/logo-white.png" alt="" draggable="false" />
-          </div>
-          {/* ignition scan-line + ink-stamp shutter */}
-          <div className="lr__scan" />
-          <div className="lr__shutter" />
+          {/* the REAL brush mark, revealed by a conic mask that paints it on */}
+          <img className="lr__brush" src="/assets/logo-mark.png" alt="" draggable="false" />
         </div>
 
-        <div className="lr__word" ref={wordRef}>madane</div>
+        <div className="lr__wordmark">
+          <div className="lr__word" ref={wordRef}>madane</div>
+          <div className="lr__wordsub">design workshop</div>
+        </div>
 
         <div className="lr__tag">
           <span className="lr__tag-i">architecture &middot; interiors &middot; turnkey</span>

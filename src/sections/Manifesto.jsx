@@ -66,8 +66,22 @@ export function Manifesto() {
             </span>
           ))}
         </p>
-        <div className="mf__sign">
-          <span>{brand.full.toLowerCase()}</span>
+        <div className="mf__sign" aria-label={brand.full}>
+          <div className="mf__lockup">
+            <img
+              className="mf__sign-mark"
+              src="/assets/logo-mark.png"
+              alt=""
+              aria-hidden="true"
+              loading="lazy"
+              decoding="async"
+            />
+            <span className="mf__sign-rule" aria-hidden="true" />
+            <span className="mf__sign-name">
+              <span className="mf__sign-word">madane</span>
+              <span className="mf__sign-tag">design workshop · llp</span>
+            </span>
+          </div>
           <span className="mf__motto">giving the world things they haven’t imagined before</span>
         </div>
       </div>

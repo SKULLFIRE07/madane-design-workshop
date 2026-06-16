@@ -7,31 +7,109 @@ gsap.registerPlugin(ScrollTrigger)
 
 export function Edge() {
   const root = useRef(null)
-  const nodeRef = useRef(null)
-  const fillRef = useRef(null)
-  const wordRef = useRef(null)
+  const stageRefs = useRef([])
+  const lineRef = useRef(null)
+  const counterRef = useRef(null)
   const [active, setActive] = useState(0)
 
   useLayoutEffect(() => {
     const ctx = gsap.context(() => {
       const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      const mobile = window.matchMedia('(max-width: 820px)').matches
       const n = edge.length
+      const stages = stageRefs.current.filter(Boolean)
+
+      // ---- MOBILE / REDUCED: clean stacked, every chapter fully visible, no pin ----
+      if (reduce || mobile) {
+        // clearProps must run on its own — in a combined set() GSAP applies
+        // clearProps last and would wipe the opacity/autoAlpha we just set.
+        gsap.set(stages, { clearProps: 'all' })
+        gsap.set(stages, { opacity: 1, autoAlpha: 1 })
+        if (lineRef.current) gsap.set(lineRef.current, { scaleY: 1 })
+        setActive(n - 1)
+        if (counterRef.current) counterRef.current.textContent = String(n).padStart(2, '0')
+        return
+      }
+
+      // ---- DESKTOP: pinned split-stage, masked chapter cross-fade ----
+      // each chapter occupies the stage; we reveal it with a clip wipe + lift,
+      // and let the previous recede. Only the active one is interactive.
+      stages.forEach((el, i) => {
+        gsap.set(el, {
+          autoAlpha: i === 0 ? 1 : 0,
+          yPercent: i === 0 ? 0 : 6,
+          clipPath: i === 0 ? 'inset(0% 0% 0% 0%)' : 'inset(0% 0% 100% 0%)',
+        })
+      })
+      if (lineRef.current) gsap.set(lineRef.current, { scaleY: 0 })
+
+      let current = 0
+      const show = (i) => {
+        if (i === current) return
+        const incoming = stages[i]
+        const outgoing = stages[current]
+        const dir = i > current ? 1 : -1
+        // promote only the two chapters actively wiping; clear every other so
+        // no chapter retains will-change after a fast scrub overwrites its
+        // onComplete (perf law: will-change only on actively animating els).
+        stages.forEach((el) => {
+          if (el !== incoming && el !== outgoing) gsap.set(el, { willChange: 'auto' })
+        })
+        gsap.set([incoming, outgoing], { willChange: 'transform, opacity, clip-path' })
+        // recede the old chapter
+        gsap.to(outgoing, {
+          autoAlpha: 0,
+          yPercent: -6 * dir,
+          clipPath: dir > 0 ? 'inset(0% 0% 100% 0%)' : 'inset(100% 0% 0% 0%)',
+          duration: 0.55,
+          ease: 'power2.inOut',
+          overwrite: true,
+          onComplete: () => gsap.set(outgoing, { willChange: 'auto' }),
+        })
+        // wipe in the new chapter
+        gsap.fromTo(
+          incoming,
+          {
+            autoAlpha: 0,
+            yPercent: 6 * dir,
+            clipPath: dir > 0 ? 'inset(100% 0% 0% 0%)' : 'inset(0% 0% 100% 0%)',
+          },
+          {
+            autoAlpha: 1,
+            yPercent: 0,
+            clipPath: 'inset(0% 0% 0% 0%)',
+            duration: 0.65,
+            ease: 'power3.out',
+            overwrite: true,
+            onComplete: () => gsap.set(incoming, { willChange: 'auto' }),
+          }
+        )
+        current = i
+      }
+
       const st = ScrollTrigger.create({
         trigger: root.current,
         start: 'top top',
-        end: `+=${reduce ? 0 : n * 60}%`,
-        pin: !reduce,
-        scrub: reduce ? false : 0.5,
+        end: () => `+=${n * 62}%`,
+        pin: '.edge__sticky',
+        scrub: 0.5,
         onUpdate: (self) => {
           const p = self.progress
-          const i = Math.min(n - 1, Math.floor(p * n))
-          setActive(i)
-          if (nodeRef.current) gsap.set(nodeRef.current, { left: `${4 + p * 92}%` })
-          if (fillRef.current) gsap.set(fillRef.current, { width: `${4 + p * 92}%` })
-          if (wordRef.current) gsap.set(wordRef.current, { xPercent: -p * 26 })
+          // map progress -> step index with a small dwell at the ends
+          const i = Math.min(n - 1, Math.max(0, Math.floor(p * n - 1e-6)))
+          if (lineRef.current) {
+            gsap.set(lineRef.current, { scaleY: gsap.utils.clamp(0, 1, (i + 0.5) / n) })
+          }
+          if (counterRef.current) {
+            counterRef.current.textContent = String(i + 1).padStart(2, '0')
+          }
+          if (i !== current) {
+            show(i)
+            setActive(i)
+          }
         },
       })
-      if (reduce) setActive(n - 1)
+
       return () => st.kill()
     }, root)
     return () => ctx.revert()
@@ -40,39 +118,66 @@ export function Edge() {
   return (
     <section id="edge" className="edge" ref={root}>
       <div className="edge__sticky grain">
-        <div className="edge__word" ref={wordRef} aria-hidden>EDGE</div>
+        <div className="edge__bg" aria-hidden>edge</div>
 
         <div className="edge__inner wrap">
-          <header className="edge__head">
+          {/* ---- left column: the operating index ---- */}
+          <aside className="edge__aside">
             <span className="eyebrow">the mdw edge</span>
-            <h2 className="edge__title">locate · evaluate · create · operate</h2>
-            <p className="edge__lede">one platform from site-search to facility lifecycle · single point of accountability, optimised financial decisions, design excellence.</p>
-          </header>
+            <p className="edge__lede">
+              one platform — site-search to facility lifecycle. a single line
+              of accountability across every decision.
+            </p>
 
-          <div className="edge__rail">
-            <div className="edge__track"><div className="edge__fill" ref={fillRef} /></div>
-            <div className="edge__node" ref={nodeRef}><span /></div>
-            <ul className="edge__steps">
+            <nav className="edge__index" aria-label="the mdw edge — six stages">
+              <span className="edge__rail" aria-hidden>
+                <span className="edge__rail-fill" ref={lineRef} />
+              </span>
+              <ol>
+                {edge.map((s, i) => (
+                  <li
+                    key={s.step}
+                    className={
+                      i === active ? 'is-active' : i < active ? 'is-done' : ''
+                    }
+                  >
+                    <em>{String(i + 1).padStart(2, '0')}</em>
+                    <span>{s.step}</span>
+                  </li>
+                ))}
+              </ol>
+            </nav>
+          </aside>
+
+          {/* ---- right column: the chapter stage ---- */}
+          <div className="edge__stage">
+            <span className="edge__counter" aria-hidden>
+              <b ref={counterRef}>01</b>
+              <i>/ {String(edge.length).padStart(2, '0')}</i>
+            </span>
+
+            <div className="edge__chapters">
               {edge.map((s, i) => (
-                <li key={s.step} className={i === active ? 'is-active' : i < active ? 'is-done' : ''}>
-                  <em>{String(i + 1).padStart(2, '0')}</em>
-                  <span>{s.step}</span>
-                </li>
+                <article
+                  key={s.step}
+                  ref={(el) => (stageRefs.current[i] = el)}
+                  className="edge__chapter"
+                  aria-hidden={i !== active}
+                >
+                  <span className="edge__chapter-tag">{s.tag}</span>
+                  <h3 className="edge__chapter-name">{s.step}</h3>
+                  <p className="edge__chapter-desc">{s.desc}</p>
+                  <ul className="edge__spec">
+                    {s.details.map((d, di) => (
+                      <li key={d}>
+                        <em>{String(di + 1).padStart(2, '0')}</em>
+                        <span>{d}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </article>
               ))}
-            </ul>
-          </div>
-
-          <div className="edge__panels">
-            {edge.map((s, i) => (
-              <div key={s.step} className={`edge__panel ${i === active ? 'is-active' : ''}`}>
-                <div className="edge__paneltag">{s.tag}</div>
-                <h3>{s.step}</h3>
-                <p>{s.desc}</p>
-                <ul>
-                  {s.details.map((d) => <li key={d}>{d}</li>)}
-                </ul>
-              </div>
-            ))}
+            </div>
           </div>
         </div>
       </div>

@@ -1,12 +1,14 @@
 import { useLayoutEffect, useRef } from 'react'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import { projects } from '../data/site'
+import { projects, brand } from '../data/site'
 
 gsap.registerPlugin(ScrollTrigger)
 
 /* Title case, descender-safe. Each token becomes its own line-mask;
-   reveal is translateY 100% -> 0 ONLY (never combined with clip-path). */
+   the entrance reveal is translateY 100% -> 0 ONLY (never combined with
+   clip-path). The CSS REST state is the final visible state, so the
+   column is never blank — GSAP only plays an on-enter rise. */
 const HEADLINE = [
   'An',
   'architecture,',
@@ -16,8 +18,18 @@ const HEADLINE = [
   'studio.',
 ]
 
+const LEDE = 'One studio. The whole build.'
+
 const BODY =
-  'Madane designs and builds high-performance, sustainable commercial workplaces across Bharat. One studio, end to end, from the first line to the final handover.'
+  'Madane designs and builds high-performance, sustainable commercial workplaces across Bharat — end to end, from the first line to the final handover.'
+
+/* small editorial spec line, derived from brand data (no colour, mono) */
+const SPEC = [
+  `est. ${brand.founded}`,
+  'architecture',
+  'interiors',
+  'turnkey',
+]
 
 const cover = (projects.find((p) => p.id === 'tata') || projects.find((p) => p.id === 'sgl') || projects[0]).cover
 
@@ -28,7 +40,9 @@ export default function PhilosophyReveal() {
   const imgRef = useRef(null)
   const textRef = useRef(null)
   const lineRef = useRef(null)
+  const ledeRef = useRef(null)
   const bodyRef = useRef(null)
+  const tailRef = useRef(null)
   const wordsRef = useRef([])
 
   wordsRef.current = []
@@ -41,40 +55,31 @@ export default function PhilosophyReveal() {
       const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
       const mobile = window.matchMedia('(max-width: 860px)').matches
 
-      // ---- prefers-reduced-motion: snap everything to its final state ----
-      if (reduce) {
-        gsap.set(wordsRef.current, { yPercent: 0 })
-        gsap.set([imgRef.current, textRef.current], {
-          xPercent: 0,
-          scale: 1,
-          clearProps: 'transform',
-        })
-        gsap.set(lineRef.current, { scaleX: 1 })
-        gsap.set(bodyRef.current, { y: 0, opacity: 1 })
-        return
-      }
+      // CSS rest state already = final visible state, so reduced-motion is a no-op.
+      if (reduce) return
 
-      // ---- mobile (<860px): stacked, no pin, gentle fade-ups ----
+      // ---- mobile (<860px): stacked, no pin, gentle on-enter reveals ----
       if (mobile) {
         gsap.from(wordsRef.current, {
-          yPercent: 100,
-          duration: 0.85,
+          yPercent: 105,
+          duration: 0.8,
           ease: 'power3.out',
-          stagger: 0.07,
-          scrollTrigger: { trigger: textRef.current, start: 'top 82%' },
+          stagger: 0.06,
+          scrollTrigger: { trigger: textRef.current, start: 'top 84%' },
         })
         gsap.from(lineRef.current, {
           scaleX: 0,
           duration: 0.7,
           ease: 'power2.out',
-          scrollTrigger: { trigger: textRef.current, start: 'top 82%' },
+          scrollTrigger: { trigger: textRef.current, start: 'top 84%' },
         })
-        gsap.from(bodyRef.current, {
-          y: 24,
+        gsap.from([ledeRef.current, bodyRef.current, tailRef.current], {
+          y: 22,
           opacity: 0,
-          duration: 0.8,
+          duration: 0.75,
           ease: 'power2.out',
-          scrollTrigger: { trigger: bodyRef.current, start: 'top 88%' },
+          stagger: 0.1,
+          scrollTrigger: { trigger: textRef.current, start: 'top 78%' },
         })
         gsap.from(imgRef.current, {
           opacity: 0,
@@ -86,13 +91,59 @@ export default function PhilosophyReveal() {
         return
       }
 
-      // ---- desktop: pinned + scrubbed cinematic beat ----
-      // initial states (so the scrub timeline has a clean origin)
-      gsap.set(wordsRef.current, { yPercent: 100 })
-      gsap.set(lineRef.current, { scaleX: 0 })
-      gsap.set(bodyRef.current, { yPercent: 40, opacity: 0 })
+      // ---- desktop ----
+      // The reveal (text + photo clip-wipe) is an on-enter timeline (NOT
+      // scrubbed) so the headline and photo have real presence the instant the
+      // section is in view and are never gated behind a long scrub. The pinned
+      // scrub then only adds parallax/scale on the image + a tiny text drift.
 
-      const tl = gsap.timeline({
+      // (1) On-enter reveal — plays once when the beat reaches view. The photo
+      // clip-wipe lives HERE (not on the scrub) so it opens as the section
+      // enters and is fully open for the entire pin — no pop at pin start, and
+      // its from-state is only written when the trigger nears, so the photo is
+      // not held hidden through the whole approach.
+      const intro = gsap.timeline({
+        scrollTrigger: {
+          trigger: root.current,
+          start: 'top 72%',
+          once: true,
+        },
+        defaults: { ease: 'power3.out' },
+      })
+      intro
+        .fromTo(
+          mediaRef.current,
+          { clipPath: 'inset(0 100% 0 0)' },
+          { clipPath: 'inset(0 0% 0 0)', duration: 0.9 },
+          0
+        )
+        .from(lineRef.current, { scaleX: 0, duration: 0.55, ease: 'power2.out' }, 0.05)
+        .from(
+          wordsRef.current,
+          { yPercent: 105, duration: 0.72, stagger: 0.06 },
+          0.04
+        )
+        .from(
+          ledeRef.current,
+          { yPercent: 60, opacity: 0, duration: 0.6 },
+          0.16
+        )
+        .from(
+          bodyRef.current,
+          { y: 18, opacity: 0, duration: 0.7, ease: 'power2.out' },
+          0.34
+        )
+        .from(
+          tailRef.current,
+          { y: 16, opacity: 0, duration: 0.7, ease: 'power2.out' },
+          0.46
+        )
+
+      // (2) Pinned scrub — parallax + scale settle on the image, plus a gentle
+      // counter-drift of the whole text block. Photo is already fully open;
+      // the scrub only MOVES, never hides. Image from-state (xPercent/scale) is
+      // a benign offset under the photo's -8%/-16% bleed, so nothing is exposed.
+      const scene = gsap.timeline({
         scrollTrigger: {
           trigger: root.current,
           start: 'top top',
@@ -104,54 +155,20 @@ export default function PhilosophyReveal() {
         },
       })
 
-      // Media wipes open (left -> right) as the beat enters — the "crazy" reveal.
-      tl.fromTo(
-        mediaRef.current,
-        { clipPath: 'inset(0 100% 0 0)' },
-        { clipPath: 'inset(0 0% 0 0)', ease: 'power3.out', duration: 0.6 },
-        0
-      )
-
-      // Image: real right -> left parallax travel + scale settle 1.12 -> 1.0.
-      tl.fromTo(
+      // Image: right -> left parallax travel + scale settle 1.18 -> 1.0.
+      scene.fromTo(
         imgRef.current,
         { xPercent: 10, scale: 1.18 },
         { xPercent: -10, scale: 1, ease: 'none' },
         0
       )
 
-      // Whole text block counter-moves slightly to the right.
-      tl.fromTo(
+      // Whole text block counter-drifts very slightly to the right.
+      scene.fromTo(
         textRef.current,
         { xPercent: 0 },
-        { xPercent: 3, ease: 'none' },
+        { xPercent: 2.4, ease: 'none' },
         0
-      )
-
-      // Hairline draws under the eyebrow (1px rule, left origin).
-      tl.to(
-        lineRef.current,
-        { scaleX: 1, ease: 'power2.out', duration: 0.45 },
-        0.05
-      )
-
-      // Headline words rise inside their line-masks. translateY ONLY.
-      tl.to(
-        wordsRef.current,
-        {
-          yPercent: 0,
-          ease: 'power3.out',
-          stagger: 0.07,
-          duration: 0.55,
-        },
-        0.1
-      )
-
-      // Body paragraph fades up after the headline settles.
-      tl.to(
-        bodyRef.current,
-        { yPercent: 0, opacity: 1, ease: 'power2.out', duration: 0.5 },
-        0.55
       )
     }, root)
 
@@ -174,31 +191,49 @@ export default function PhilosophyReveal() {
           </div>
 
           <div className="pr__text" ref={textRef}>
-            <span className="pr__eyebrow">Philosophy / 01</span>
-            <span
-              className="pr__line"
-              ref={lineRef}
-              aria-hidden="true"
-            />
+            <div className="pr__index" aria-hidden="true">
+              <span className="pr__index-num">01</span>
+              <span className="pr__index-rule" />
+              <span className="pr__index-total">05</span>
+            </div>
 
-            <h2 className="pr__headline">
-              {HEADLINE.map((w, i) => (
-                <span className="pr__wmask" key={i}>
-                  <span className="pr__word" ref={addWord}>
-                    {w}
+            <div className="pr__col">
+              <span className="pr__eyebrow">Philosophy</span>
+              <span className="pr__line" ref={lineRef} aria-hidden="true" />
+
+              <p className="pr__lede" ref={ledeRef}>
+                {LEDE}
+              </p>
+
+              <h2 className="pr__headline">
+                {HEADLINE.map((w, i) => (
+                  <span className="pr__wmask" key={i}>
+                    <span className="pr__word" ref={addWord}>
+                      {w}
+                    </span>
                   </span>
-                </span>
-              ))}
-            </h2>
+                ))}
+              </h2>
 
-            <p className="pr__body" ref={bodyRef}>
-              {BODY}
-            </p>
+              <p className="pr__body" ref={bodyRef}>
+                {BODY}
+              </p>
 
-            <a className="pr__more" href="#studio" data-cursor="view">
-              <span className="pr__more-label">Read the studio</span>
-              <span className="pr__more-rule" aria-hidden="true" />
-            </a>
+              <div className="pr__tail" ref={tailRef}>
+                <ul className="pr__spec" aria-label="Studio scope">
+                  {SPEC.map((s, i) => (
+                    <li className="pr__spec-item" key={i}>
+                      {s}
+                    </li>
+                  ))}
+                </ul>
+
+                <a className="pr__more" href="#studio" data-cursor="view">
+                  <span className="pr__more-label">Read the studio</span>
+                  <span className="pr__more-rule" aria-hidden="true" />
+                </a>
+              </div>
+            </div>
           </div>
         </div>
       </div>

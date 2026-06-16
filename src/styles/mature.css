@@ -37,7 +37,7 @@ h1, h2, h3, h4 { font-weight: 400; }
 }
 
 /* ---- kill ALL glows / gradient-text / coloured borders ---- */
-.hero__bharat { font-style: italic; }
+.hero__bharat { font-style: normal; } /* Devanagari "भारत" — no italic */
 .progress-bar { box-shadow: none !important; }
 .gc-line, .im-arc, .im-head, .im-land, .g-line { filter: none !important; }
 .gc-dot, .g-dot, .edge__node span, .sectors__preview, .im-land {

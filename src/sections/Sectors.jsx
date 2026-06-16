@@ -20,23 +20,17 @@ const SECTORS = [
 ]
 
 const N = SECTORS.length
-
-// small drawn arrow — monochrome, currentColor, crisp
-function Arrow() {
-  return (
-    <svg className="sx__arrow" width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden focusable="false">
-      <path d="M6 16L16 6" stroke="currentColor" strokeWidth="1.4" strokeLinecap="square" />
-      <path d="M7.5 6H16V14.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="square" strokeLinejoin="miter" />
-    </svg>
-  )
-}
+const pad2 = (n) => String(n).padStart(2, '0')
 
 export function Sectors() {
   const root = useRef(null)
   const imgRefs = useRef([])
+  const bigRefs = useRef([])
   // scroll-driven index (auto-advance) vs hover-driven override
   const [scrollIdx, setScrollIdx] = useState(0)
   const [hoverIdx, setHoverIdx] = useState(null)
+  const prevActive = useRef(0)
+  const mounted = useRef(false)
 
   // hover wins when present, otherwise the scrubbed scroll index
   const active = hoverIdx != null ? hoverIdx : scrollIdx
@@ -66,11 +60,11 @@ export function Sectors() {
         return
       }
 
-      // desktop: pin the section and scrub the active sector 01 -> 12
+      // desktop: pin the stage and scrub the active sector 01 -> 12
       const st = ScrollTrigger.create({
         trigger: root.current,
         start: 'top top',
-        end: `+=${N * 62}%`,
+        end: `+=${N * 64}%`,
         pin: '.sx__sticky',
         scrub: 0.5,
         onUpdate: (self) => {
@@ -84,9 +78,12 @@ export function Sectors() {
     return () => ctx.revert()
   }, [])
 
-  // premium crossfade + subtle scale settle whenever the active image changes
+  // CINEMATIC SWAP: the huge Fraunces sector name masked-swaps; photo blooms.
   useLayoutEffect(() => {
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    const mobile = window.matchMedia('(max-width: 859px)').matches
+
+    // ---- preview photos: crossfade + parallax settle ----
     imgRefs.current.forEach((el, i) => {
       if (!el) return
       const on = i === active
@@ -101,70 +98,128 @@ export function Sectors() {
         overwrite: 'auto',
       })
       if (on) {
-        gsap.fromTo(el, { scale: 1.05 }, { scale: 1, duration: 1.3, ease: 'power2.out', overwrite: 'auto' })
+        gsap.fromTo(el, { scale: 1.08 }, { scale: 1, duration: 1.6, ease: 'power2.out', overwrite: 'auto' })
       }
     })
+
+    // ---- big kinetic sector name: mask-wipe the outgoing, slide-in the active ----
+    if (mobile) {
+      prevActive.current = active
+      mounted.current = true
+      return
+    }
+    // first render: place the active name statically, no slide
+    if (!mounted.current) {
+      bigRefs.current.forEach((el, i) => {
+        if (!el) return
+        gsap.set(el, { yPercent: i === active ? 0 : 112, opacity: i === active ? 1 : 0 })
+      })
+      prevActive.current = active
+      mounted.current = true
+      return
+    }
+    const dir = active >= prevActive.current ? 1 : -1
+    bigRefs.current.forEach((el, i) => {
+      if (!el) return
+      const on = i === active
+      const was = i === prevActive.current
+      if (reduce) {
+        gsap.set(el, { yPercent: on ? 0 : 110, opacity: on ? 1 : 0 })
+        return
+      }
+      if (on) {
+        gsap.fromTo(
+          el,
+          { yPercent: 112 * dir, opacity: 0 },
+          { yPercent: 0, opacity: 1, duration: 0.9, ease: 'power4.out', overwrite: true },
+        )
+      } else if (was) {
+        gsap.to(el, { yPercent: -108 * dir, opacity: 0, duration: 0.8, ease: 'power3.in', overwrite: true })
+      } else {
+        gsap.set(el, { yPercent: 112, opacity: 0 })
+      }
+    })
+    prevActive.current = active
   }, [active])
 
   return (
     <section id="sectors" className="sx" ref={root}>
       <div className="sx__sticky">
+        {/* full-bleed cinematic preview lives behind the composition */}
+        <div className="sx__stage" aria-hidden>
+          {SECTORS.map((s, i) => (
+            <div
+              key={s.name}
+              ref={(el) => (imgRefs.current[i] = el)}
+              className={`sx__pimg ${active === i ? 'is-on' : ''}`}
+              style={{ backgroundImage: `url(${s.img})`, opacity: i === 0 ? 1 : 0 }}
+            />
+          ))}
+          <div className="sx__veil" />
+          <div className="sx__grain" />
+        </div>
+
         <div className="sx__inner wrap">
+          {/* TOP: eyebrow + the "one standard" through-line, slate-style */}
           <header className="sx__head">
-            <span className="eyebrow">Where we work</span>
-            <h2 className="sx__title">Twelve sectors.<br />One standard.</h2>
+            <span className="eyebrow">where we work</span>
+            <span className="sx__through">
+              <span className="sx__through-line" />
+              <span className="sx__through-txt">one&nbsp;standard</span>
+            </span>
           </header>
 
-          <div className="sx__body">
-            {/* LIST */}
-            <ul className="sx__list">
+          {/* CENTRE: the huge kinetic sector name + a giant ghost count */}
+          <div className="sx__feature">
+            <span className="sx__count" aria-hidden>{pad2(N)}</span>
+            <div className="sx__namestage" aria-hidden>
               {SECTORS.map((s, i) => (
-                <li
+                <h2
                   key={s.name}
-                  className={`sx__row ${active === i ? 'is-active' : ''}`}
-                  onMouseEnter={() => setHoverIdx(i)}
-                  onMouseLeave={() => setHoverIdx(null)}
-                  data-cursor=""
+                  ref={(el) => (bigRefs.current[i] = el)}
+                  className={`sx__big ${active === i ? 'is-on' : ''}`}
+                  style={i === 0 ? undefined : { opacity: 0 }}
                 >
-                  <span className="sx__item">
-                    <span className="sx__idx">{String(i + 1).padStart(2, '0')}</span>
-                    <span className="sx__name">{s.name}</span>
-                    <Arrow />
-                  </span>
-                  {/* mobile-only inline image */}
-                  <span
-                    className="sx__mobshot"
-                    style={{ backgroundImage: `url(${s.img})` }}
-                    aria-hidden
-                  />
-                </li>
+                  {s.name}
+                </h2>
               ))}
-            </ul>
-
-            {/* STICKY PREVIEW (desktop) */}
-            <div className="sx__previewcol" aria-hidden>
-              <div className="sx__preview">
-                <div className="sx__frame">
-                  {SECTORS.map((s, i) => (
-                    <div
-                      key={s.name}
-                      ref={(el) => (imgRefs.current[i] = el)}
-                      className={`sx__pimg ${active === i ? 'is-on' : ''}`}
-                      style={{ backgroundImage: `url(${s.img})`, opacity: i === 0 ? 1 : 0 }}
-                    />
-                  ))}
-                  <div className="sx__veil" />
-                </div>
-                <div className="sx__caption">
-                  <span className="sx__capidx">{String(active + 1).padStart(2, '0')} / {String(N).padStart(2, '0')}</span>
-                  <span className="sx__capname">{SECTORS[active].name}</span>
-                </div>
-                <div className="sx__progress">
-                  <span style={{ transform: `scaleX(${(active + 1) / N})` }} />
-                </div>
-              </div>
             </div>
+            <span className="sx__slate" aria-hidden>
+              <span className="sx__slate-i">{pad2(active + 1)}</span>
+              <span className="sx__slate-sep">—</span>
+              <span className="sx__slate-n">{pad2(N)}</span>
+            </span>
           </div>
+
+          {/* BOTTOM: the recessed mono ledger — navigational spine */}
+          <ul className="sx__list">
+            {SECTORS.map((s, i) => (
+              <li
+                key={s.name}
+                className={`sx__row ${active === i ? 'is-active' : ''}`}
+                onMouseEnter={() => setHoverIdx(i)}
+                onMouseLeave={() => setHoverIdx(null)}
+                data-cursor=""
+              >
+                <span className="sx__item">
+                  <span className="sx__idx">{pad2(i + 1)}</span>
+                  <span className="sx__name">{s.name}</span>
+                  <span className="sx__tick" aria-hidden />
+                </span>
+                {/* mobile-only inline image */}
+                <span
+                  className="sx__mobshot"
+                  style={{ backgroundImage: `url(${s.img})` }}
+                  aria-hidden
+                />
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        {/* thin scrub progress rail along the stage foot */}
+        <div className="sx__progress" aria-hidden>
+          <span style={{ transform: `scaleX(${(active + 1) / N})` }} />
         </div>
       </div>
     </section>

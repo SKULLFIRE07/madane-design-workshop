@@ -72,6 +72,7 @@ export function Contact() {
 
           <div className="contact__details">
             <div className="contact__badge"><BrandMark size={64} /></div>
+            <p className="contact__rally">{brand.rally}</p>
             <div className="contact__line contact__primary">
               <a href={`mailto:${contact.email}`} data-cursor="email">{contact.email}</a>
               <a href={`tel:${contact.phone.replace(/\s/g, '')}`} data-cursor="call">{contact.phone}</a>

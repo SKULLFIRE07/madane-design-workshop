@@ -1,0 +1,105 @@
+/* ============================================================
+   Manifesto signature — turn "madane design workshop llp" into a
+   real brand sign-off lockup (not generic text). Loaded LAST so it
+   overrides the legacy .mf__sign rules. Monochrome.
+   ============================================================ */
+
+/* container: signature stamp aligned to the copy, generous space above */
+.mf__sign {
+  margin-top: clamp(3rem, 7vw, 5.5rem);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: clamp(1.1rem, 2.4vw, 1.6rem);
+}
+
+/* the identity lockup: mark | hairline | wordmark, baseline-balanced */
+.mf__lockup {
+  display: flex;
+  align-items: center;
+  gap: clamp(0.9rem, 2vw, 1.35rem);
+}
+
+/* brush mark — small, white, restrained */
+.mf__sign-mark {
+  width: clamp(2.4rem, 5vw, 3.4rem);
+  height: auto;
+  display: block;
+  flex: none;
+  /* logo-mark.png is white-on-transparent; keep it crisp + monochrome */
+  opacity: 0.92;
+  filter: grayscale(100%);
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+/* thin divider rule between mark and wordmark */
+.mf__sign-rule {
+  flex: none;
+  width: 1px;
+  align-self: stretch;
+  min-height: clamp(2.6rem, 5.4vw, 3.6rem);
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    var(--hairline) 18%,
+    var(--hairline) 82%,
+    transparent
+  );
+}
+
+/* stacked wordmark + tagline */
+.mf__sign-name {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: clamp(0.42rem, 1vw, 0.62rem);
+}
+
+/* "madane" — the brand, given real presence.
+   triple-class scope raises specificity above the legacy
+   `.mf__sign span:first-child` (0,2,1) rule in sections.css. */
+.mf__sign .mf__sign-name .mf__sign-word {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(1.9rem, 5vw, 3.1rem);
+  line-height: 0.92;
+  letter-spacing: -0.025em;
+  color: var(--paper);
+  text-transform: lowercase;
+}
+
+/* "design workshop · llp" — refined mono tagline beneath, like a stamp line */
+.mf__sign-tag {
+  font-family: var(--font-mono);
+  font-weight: 400;
+  font-size: clamp(0.58rem, 1.1vw, 0.72rem);
+  letter-spacing: 0.34em;
+  text-transform: uppercase;
+  color: var(--paper-faint);
+  padding-left: 0.06em; /* optical align under the cap of the wordmark */
+}
+
+/* motto — kept beneath, Fraunces italic, dim (matches refine.css intent) */
+.mf__motto {
+  font-family: var(--font-display) !important;
+  font-style: italic;
+  font-weight: 400;
+  color: var(--paper-dim) !important;
+  font-size: clamp(0.95rem, 1.8vw, 1.3rem) !important;
+  letter-spacing: -0.005em;
+  max-width: 38ch;
+  line-height: 1.35;
+}
+
+/* ---- mobile ---- */
+@media (max-width: 600px) {
+  .mf__sign { gap: 1rem; }
+  .mf__lockup { gap: 0.85rem; }
+  .mf__sign-tag { letter-spacing: 0.28em; }
+}
+
+/* high-contrast / forced-colors safety: never let the mark vanish */
+@media (forced-colors: active) {
+  .mf__sign-mark { filter: none; opacity: 1; }
+}

@@ -4,12 +4,12 @@
    ============================================================ */
 
 /* ---- deeper black, more restraint ---- */
-:root { --ink: #030305; --ink-2: #060709; --ink-3: #0c0e14; }
-body { background: #030305; }
-.stats { background: linear-gradient(180deg, #000, #050608) !important; }
-.cap, .growth { background: #050608 !important; }
-.works { background: linear-gradient(180deg, #000, #050608) !important; }
-.clients { background: #050608 !important; }
+:root { --ink: #040404; --ink-2: #070707; --ink-3: #0e0e0e; }
+body { background: #040404; }
+.stats { background: linear-gradient(180deg, #000, #060606) !important; }
+.cap, .growth { background: #060606 !important; }
+.works { background: linear-gradient(180deg, #000, #060606) !important; }
+.clients { background: #060606 !important; }
 .sectors, .why, .mf, .contact { background: #000 !important; }
 
 /* calmer aurora · a faint glow, not a wash (more black) */
@@ -139,9 +139,10 @@ body { background: #030305; }
 .indiamap__glow {
   position: absolute; inset: 6% 4%; border-radius: 46% 54% 50% 50%;
   background: radial-gradient(circle, rgba(255,255,255,0.22), transparent 62%);
-  filter: blur(26px); opacity: 0; transition: opacity 1.4s var(--ease-out); animation: imBreath 7s ease-in-out infinite;
+  filter: blur(14px); opacity: 0; transition: opacity 1.4s var(--ease-out);
 }
-.indiamap.is-lit .indiamap__glow { opacity: 1; }
+/* run the infinite breathing only while the map is actually lit (in view) */
+.indiamap.is-lit .indiamap__glow { opacity: 1; animation: imBreath 7s ease-in-out infinite; }
 @keyframes imBreath { 0%,100% { transform: scale(0.94); opacity: 0.7; } 50% { transform: scale(1.04); opacity: 1; } }
 .indiamap__svg { position: absolute; inset: 0; overflow: visible; z-index: 2; }
 .im-land { filter: drop-shadow(0 0 14px rgba(255,255,255,0.18)); opacity: 0; transition: opacity 1.2s var(--ease-out); }

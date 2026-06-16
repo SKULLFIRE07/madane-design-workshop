@@ -89,10 +89,8 @@ export function Capabilities() {
               { scale: 1, opacity: 1, ease: 'back.out(2.4)', duration: 0.45 }, at)
               .fromTo(idxs[n], { yPercent: 120, opacity: 0 },
                 { yPercent: 0, opacity: 1, ease: 'power2.out', duration: 0.45 }, at + 0.05)
-              .fromTo(words[n], { yPercent: 118 },
-                { yPercent: 0, ease: 'power3.out', duration: 0.6 }, at + 0.08)
-              .fromTo(words[n], { opacity: 0.16, filter: 'blur(6px)' },
-                { opacity: 1, filter: 'blur(0px)', ease: 'power2.out', duration: 0.6 }, at + 0.08)
+              .fromTo(words[n], { yPercent: 118, opacity: 0.16 },
+                { yPercent: 0, opacity: 1, ease: 'power3.out', duration: 0.6 }, at + 0.08)
               .fromTo(notes[n], { opacity: 0, yPercent: 60 },
                 { opacity: 1, yPercent: 0, ease: 'power2.out', duration: 0.5 }, at + 0.28)
             if (arrows[n]) {

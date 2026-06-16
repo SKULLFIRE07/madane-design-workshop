@@ -62,9 +62,21 @@ main { display: block; }
 .hero__line { display: block; overflow: hidden; }
 .hero__line .ln { display: inline-block; }
 .hero__bharat {
-  background: var(--grad-blue);
-  -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
-  font-style: italic;
+  /* the one bold bharat moment — Devanagari "भारत" in the Indian-flag tricolor
+     (saffron / white / india-green). Crisp bands read unmistakably as the flag. */
+  font-family: var(--font-sanskrit);
+  font-style: normal;
+  font-weight: 600;
+  font-size: 0.82em;          /* Devanagari runs visually large — trim to match the Fraunces caps */
+  line-height: 0.86;
+  display: inline-block;
+  vertical-align: baseline;
+  background: linear-gradient(180deg,
+    #ff9933 0%, #ff9933 34%,
+    #ffffff 34%, #ffffff 66%,
+    #138808 66%, #138808 100%);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent; color: transparent;
 }
 .hero__rally {
   font-family: var(--font-mono);
@@ -115,7 +127,7 @@ main { display: block; }
 .mf__motto { font-family: var(--font-sanskrit); color: var(--blue-glow); font-size: clamp(0.9rem, 1.6vw, 1.15rem); }
 
 /* ===================== STATS ===================== */
-.stats { background: linear-gradient(180deg, #000, #06070c); }
+.stats { background: linear-gradient(180deg, #000, #070707); }
 .stats__head { margin-bottom: clamp(2.5rem, 6vw, 4.5rem); }
 .stats__title { font-size: clamp(2.4rem, 6.5vw, 5.5rem); margin-top: 1rem; text-transform: lowercase; }
 .stats__body { display: grid; grid-template-columns: 1.25fr 1fr; gap: clamp(2rem, 4vw, 4rem); align-items: start; }
@@ -134,7 +146,7 @@ main { display: block; }
 .stats__maptag strong { color: var(--blue-glow); }
 
 /* ===================== CAPABILITIES ===================== */
-.cap { position: relative; background: #06070c; }
+.cap { position: relative; background: #070707; }
 .cap__sticky { min-height: 100svh; display: flex; flex-direction: column; justify-content: center; overflow: hidden; }
 .cap__head { margin-bottom: clamp(1.5rem, 4vw, 3rem); }
 .cap__title { font-size: clamp(2.2rem, 6vw, 5rem); margin-top: 1rem; text-transform: lowercase; }
@@ -162,12 +174,13 @@ main { display: block; }
 }
 
 /* ===================== EDGE ===================== */
-.edge { position: relative; background: linear-gradient(180deg, #06070c, #000); }
+.edge { position: relative; background: linear-gradient(180deg, #070707, #000); }
 .edge__sticky { position: relative; min-height: 100svh; display: flex; align-items: center; overflow: hidden; }
 .edge__word {
-  position: absolute; bottom: -4vh; right: -2vw; z-index: 0;
-  font-family: var(--font-display); font-weight: 800; font-size: clamp(10rem, 34vw, 36rem);
-  line-height: 0.8; color: transparent; -webkit-text-stroke: 1px rgba(255,255,255,0.07); pointer-events: none; white-space: nowrap;
+  position: absolute; bottom: clamp(1.5rem, 4vh, 3.5rem); right: -2vw; z-index: 0;
+  font-family: var(--font-display); font-weight: 800; font-size: clamp(8rem, 28vw, 30rem);
+  line-height: 0.9; color: transparent; -webkit-text-stroke: 1px rgba(255,255,255,0.07); pointer-events: none; white-space: nowrap;
+  padding-bottom: 0.12em; /* keep glyph bottoms clear of the overflow clip */
 }
 .edge__inner { position: relative; z-index: 2; width: 100%; }
 .edge__head { max-width: 760px; margin-bottom: clamp(2rem, 5vw, 3.5rem); }
@@ -366,7 +379,7 @@ main { display: block; }
 .po__foot span { font-family: var(--font-mono); font-size: 0.75rem; color: var(--paper-faint); }
 
 /* ===================== GROWTH ===================== */
-.growth { background: #06070c; }
+.growth { background: #070707; }
 .growth__head { margin-bottom: clamp(2rem, 4vw, 3rem); }
 .growth__title { font-size: clamp(2.2rem, 6vw, 5rem); margin-top: 1rem; text-transform: lowercase; }
 .growth__big { display: flex; flex-wrap: wrap; gap: clamp(2rem, 6vw, 5rem); margin-bottom: clamp(2.5rem, 5vw, 4rem); }
@@ -409,7 +422,7 @@ main { display: block; }
 @media (max-width: 640px) { .why__row { grid-template-columns: 1fr; gap: 0.6rem; } }
 
 /* ===================== STUDIO ===================== */
-.studio { background: linear-gradient(180deg, #000, #06070c); }
+.studio { background: linear-gradient(180deg, #000, #070707); }
 .studio__head { max-width: 820px; margin-bottom: clamp(2.5rem, 6vw, 4rem); }
 .studio__title { font-size: clamp(2.4rem, 6.5vw, 5.5rem); margin-top: 1rem; text-transform: lowercase; }
 .studio__lede { color: var(--paper-dim); margin-top: 1.5rem; font-size: clamp(0.95rem, 1.5vw, 1.15rem); line-height: 1.6; max-width: 60ch; }
@@ -444,7 +457,7 @@ main { display: block; }
 .studio__chips span { font-family: var(--font-mono); font-size: 0.72rem; padding: 0.5rem 1rem; border: 1px solid var(--hairline); border-radius: 100px; color: var(--paper-dim); }
 
 /* ===================== CLIENTS ===================== */
-.clients { background: #06070c; overflow: hidden; }
+.clients { background: #070707; overflow: hidden; }
 .clients__head { margin-bottom: clamp(2.5rem, 5vw, 4rem); }
 .clients__title { font-size: clamp(1.8rem, 5vw, 4rem); margin-top: 1rem; text-transform: lowercase; }
 .clients__marquee { display: flex; flex-direction: column; gap: clamp(0.6rem, 1.4vw, 1.2rem); }
@@ -479,5 +492,16 @@ main { display: block; }
 .contact__links span { color: var(--paper-faint); }
 .contact__closing { text-align: center; padding: clamp(2rem, 6vw, 5rem) 0; font-family: var(--font-display); font-weight: 800; font-size: clamp(2rem, 11vw, 11rem); line-height: 0.9; letter-spacing: -0.02em; color: var(--blue-bright); display: flex; justify-content: center; flex-wrap: wrap; }
 .contact__closing .cl { display: inline-block; }
+/* brand rally on the right side of the contact block (under the mark) */
+.contact__rally {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(1.3rem, 2.6vw, 2.1rem);
+  letter-spacing: -0.01em;
+  line-height: 1.05;
+  color: var(--paper);
+  margin: 0.4rem 0 1.6rem;
+}
 .contact__copyline { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 0.8rem; padding-top: 2rem; border-top: 1px solid var(--hairline); font-family: var(--font-mono); font-size: 0.68rem; letter-spacing: 0.08em; color: var(--paper-faint); text-transform: lowercase; }
 .contact__copyline span:nth-child(2) { font-family: var(--font-sanskrit); }

@@ -93,17 +93,39 @@
   position: relative;
   width: clamp(240px, 34vw, 460px);
   aspect-ratio: 16 / 11;
-  will-change: transform, opacity, filter;
+  will-change: transform, opacity;
   transform: translateZ(0);
 }
 
-.lr__half {
+/* the vector mark that draws itself on (ring clockwise, then 'm' L→R) */
+.lr__svg {
   position: absolute;
   inset: 0;
-  will-change: transform, clip-path;
+  width: 100%;
+  height: 100%;
+  display: block;
+  pointer-events: none;
+  overflow: visible;
+  will-change: transform, opacity;
 }
 
-.lr__half img {
+/* the draw-on paths — only stroke-dashoffset/opacity are animated by GSAP.
+   stroke-dashoffset is NOT a compositable property, so will-change on it is
+   pure overhead (and the owner flagged idle will-change as a jank source) —
+   the .lr__svg layer above already carries will-change: transform, opacity. */
+
+/* the angle the brush "paint" has swept to (0deg = nothing, 360deg = whole
+   mark revealed). Registered so it animates as a real angle. */
+@property --paint {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 360deg;
+}
+
+/* the authentic brush mark — revealed by a conic mask that sweeps CLOCKWISE
+   from 12 o'clock, so the real hand-painted strokes appear as if a brush is
+   drawing the circle around. The 'm' (knocked out of the disc) emerges with it. */
+.lr__brush {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -111,35 +133,28 @@
   object-fit: contain;
   display: block;
   pointer-events: none;
+  will-change: transform, opacity;
+  -webkit-mask-image: conic-gradient(from -90deg, #000 0deg, #000 var(--paint, 360deg), transparent var(--paint, 360deg));
+          mask-image: conic-gradient(from -90deg, #000 0deg, #000 var(--paint, 360deg), transparent var(--paint, 360deg));
+  -webkit-mask-repeat: no-repeat;
+          mask-repeat: no-repeat;
 }
 
-/* ignition scan-line that "prints" the mark */
-.lr__scan {
+/* impact shockwave rings — burst out when the brush mark stamps in */
+.lr__shock {
   position: absolute;
   top: 50%;
-  left: -3%;
-  width: 106%;
-  height: 1px;
-  margin-top: -0.5px;
-  background: #fff;
-  box-shadow: 0 0 14px 1px rgba(255, 255, 255, 0.65);
-  transform: scaleX(0);
+  left: 50%;
+  width: 62%;
+  aspect-ratio: 1;
+  margin: 0;
+  border: 1.5px solid rgba(255, 255, 255, 0.55);
+  border-radius: 50%;
+  /* centring (xPercent/yPercent) + scale are owned by GSAP so its scale tween
+     doesn't clobber a CSS translate(); see LogoReveal timeline. */
+  opacity: 0;
+  pointer-events: none;
   will-change: transform, opacity;
-  pointer-events: none;
-}
-
-/* hard ink-stamp shutter that punches across the mark */
-.lr__shutter {
-  position: absolute;
-  top: -6%;
-  left: -2%;
-  width: 104%;
-  height: 112%;
-  background: #fff;
-  transform: scaleX(0);
-  will-change: transform;
-  mix-blend-mode: difference;
-  pointer-events: none;
 }
 
 /* ---- kinetic wordmark ---------------------------------------------- */
@@ -165,6 +180,23 @@
 .lr__word .char {
   display: inline-block;
   will-change: transform;
+}
+
+/* wordmark lockup: big "madane" + tracked "design workshop" beneath */
+.lr__wordmark {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(8px, 1.3vh, 18px);
+}
+.lr__wordsub {
+  font-family: var(--font-mono);
+  font-size: clamp(11px, 1.5vw, 17px);
+  letter-spacing: 0.46em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.62);
+  padding-left: 0.46em;
+  will-change: transform, opacity;
 }
 
 /* ---- disciplines line --------------------------------------------- */

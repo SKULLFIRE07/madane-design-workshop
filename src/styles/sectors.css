@@ -1,7 +1,10 @@
 /* ============================================================
-   SECTORS — pinned, scroll-scrubbed sector index + sticky preview
-   Monochrome. Photos are the only colour. Loaded LAST.
-   Namespaced under .sx so it does not collide with legacy rules.
+   SECTORS — "twelve sectors. one standard."
+   A pinned, scroll-scrubbed CINEMATIC index: a full-bleed editorial
+   photo blooms desaturated -> colour behind a HUGE kinetic Fraunces
+   sector name that masked-swaps 01 -> 12, with a recessed mono ledger
+   acting as the navigational spine. Strictly monochrome — the active
+   PHOTO is the only colour anywhere. Loaded LAST. Namespaced under .sx.
    ============================================================ */
 
 .sx {
@@ -10,227 +13,269 @@
   color: var(--paper);
 }
 
-/* the pinned stage — full viewport height while scrubbing.
-   100svh (small-viewport) keeps the stage honest on laptops with dynamic
-   browser chrome; the legacy 100vh stays as a fallback. */
+/* the pinned stage — one honest viewport while scrubbing */
 .sx__sticky {
+  position: relative;
   min-height: 100vh;
   min-height: 100svh;
-  display: flex;
-  align-items: center;
   overflow: hidden;
+  isolation: isolate;
 }
 
-/* The whole pinned composition (header + body) must live inside one viewport.
-   We bound the inner block height and let the preview frame absorb the slack,
-   so nothing in the right column can ever fall under the overflow:hidden edge. */
-.sx__inner {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  /* tighter, viewport-relative padding so short laptops still fit.
-     Upper bound kept modest so tall screens don't inflate the budget. */
-  padding-block: clamp(2.2rem, 4.5vh, 3.5rem);
-  /* reserve nothing beyond the stage; body is sized against this budget */
-  max-height: 100svh;
-}
-
-/* ---- header ---- */
-.sx__head {
-  margin-bottom: clamp(1.4rem, 3vh, 2.2rem);
-  flex: none;
-}
-.sx__title {
-  font-family: var(--font-display);
-  font-weight: 400;
-  /* cap the top end a touch so two lines never dominate a short stage */
-  font-size: clamp(2.1rem, 5.2vw, 4.4rem);
-  line-height: 1.0;
-  letter-spacing: -0.014em;
-  margin-top: clamp(0.6rem, 1.4vh, 1rem);
-}
-
-/* ---- two-column body: list | sticky preview ---- */
-.sx__body {
-  display: grid;
-  grid-template-columns: 1.05fr 0.95fr;
-  gap: clamp(2.5rem, 6vw, 6rem);
-  align-items: center;
-  flex: 1 1 auto;
-  min-height: 0; /* allow the grid to shrink within the flex column */
-}
-
-/* ============ LIST ============ */
-.sx__list {
-  list-style: none;
-  border-top: 1px solid var(--hairline);
-  margin: 0;
-  padding: 0;
-}
-.sx__row {
-  border-bottom: 1px solid var(--hairline);
-}
-.sx__item {
-  display: flex;
-  align-items: center;
-  gap: clamp(1rem, 2vw, 1.6rem);
-  /* height-aware vertical padding: 12 rows must fit the pinned stage even on
-     short laptops, so the row rhythm shrinks with viewport height. */
-  padding: clamp(0.35rem, 0.8vh, 0.95rem) 0;
-  cursor: pointer;
-  transform: translateX(0);
-  transition: transform 0.5s var(--ease-out);
-}
-.sx__idx {
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
-  letter-spacing: 0.04em;
-  color: var(--paper-faint);
-  width: 2.2rem;
-  flex: none;
-  transition: color 0.45s var(--ease-out);
-}
-.sx__name {
-  font-family: var(--font-display);
-  font-weight: 400;
-  font-size: clamp(1.25rem, 3.1vw, 2.5rem);
-  line-height: 1.05;
-  letter-spacing: -0.015em;
-  flex: 1;
-  color: var(--paper-faint);
-  transition: color 0.45s var(--ease-out);
-}
-/* On the pinned desktop stage the 12 names must all fit one viewport, so the
-   type also yields to short heights via a vh-bounded cap. Mobile keeps the
-   base size above (no pin there). */
-@media (min-width: 860px) {
-  .sx__name {
-    font-size: clamp(1.15rem, min(3.1vw, 3.3vh), 2.4rem);
-    line-height: 1.04;
-  }
-}
-
-/* drawn SVG arrow — hidden until active */
-.sx__arrow {
-  flex: none;
-  color: var(--paper);
-  opacity: 0;
-  transform: translateX(-10px);
-  transition: opacity 0.45s var(--ease-out), transform 0.45s var(--ease-out);
-}
-.sx__arrow path { vector-effect: non-scaling-stroke; }
-
-/* active row — full white name, arrow in, slight slide */
-.sx__row.is-active .sx__item { transform: translateX(clamp(8px, 1vw, 16px)); }
-.sx__row.is-active .sx__name { color: var(--paper); }
-.sx__row.is-active .sx__idx { color: var(--paper-dim); }
-.sx__row.is-active .sx__arrow { opacity: 1; transform: translateX(0); }
-
-/* mobile inline image — hidden on desktop */
-.sx__mobshot { display: none; }
-
-/* ============ STICKY PREVIEW (desktop) ============ */
-.sx__previewcol {
-  align-self: center;
-  min-height: 0;
-}
-.sx__preview {
-  /* shared height budget: frame height is the viewport minus the reserve kept
-     for header + paddings + caption + progress. Exposed here so the caption and
-     progress bar can match the (possibly height-capped, narrower) frame width
-     and stay perfectly aligned under it. */
-  --sx-reserve: 22rem;
-  --sx-h: clamp(14rem, calc(100svh - var(--sx-reserve)), 34rem);
-  --sx-fw: min(100%, calc(var(--sx-h) * 0.8)); /* effective frame width */
-  position: relative;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center; /* centre frame + its caption/progress as one block */
-}
-
-/* HEIGHT-FIRST FRAME — the bug fix.
-   The old aspect-ratio:4/5 forced an over-tall frame whose width drove its
-   height, pushing the caption + progress under the pinned stage's
-   overflow:hidden edge. Now the frame is HEIGHT-driven from a viewport budget
-   (--sx-h on .sx__preview = 100svh minus header/paddings/caption/progress
-   reserve) and its width follows the 4:5 ratio (--sx-fw), clamped to the
-   column. The whole right preview is therefore guaranteed to fit one viewport
-   down to ~700px stage height, photo proportions intact. */
-.sx__frame {
-  position: relative;
-  /* HEIGHT-DRIVEN: cap by the viewport budget (--sx-h, defined on .sx__preview);
-     never below a sane floor. Width follows the 4:5 ratio but is clamped to the
-     column width so a short, wide viewport can't blow the frame past its column. */
-  height: var(--sx-h);
-  width: var(--sx-fw);
-  flex: none;
-  overflow: hidden;
-  border-radius: 2px;
-  border: 1px solid var(--hairline);
-  background: #0b0b0b;
-}
-/* faint inner ring — adds quiet premium depth, pure monochrome */
-.sx__frame::after {
-  content: "";
+/* ============================================================
+   FULL-BLEED CINEMATIC STAGE — editorial photo behind everything
+   ============================================================ */
+.sx__stage {
   position: absolute;
   inset: 0;
-  pointer-events: none;
-  z-index: 2;
-  border-radius: inherit;
-  box-shadow: inset 0 0 0 1px var(--hairline-soft);
+  z-index: 0;
+  overflow: hidden;
 }
 .sx__pimg {
   position: absolute;
   inset: 0;
   background-size: cover;
   background-position: center;
-  /* inactive sectors sit desaturated — active photo blooms to full colour */
-  filter: grayscale(0.78) contrast(1.04) brightness(0.92);
-  transform: scale(1.05);
-  will-change: transform, opacity;
-  transition: filter 0.9s var(--ease-out);
+  /* inactive sit desaturated; active blooms to full colour */
+  filter: grayscale(0.82) contrast(1.05) brightness(0.66);
+  transform: scale(1.08);
+  transition: filter 1s var(--ease-out);
 }
+/* promote only the active photo — never leave 12 idle layers on the GPU */
 .sx__pimg.is-on {
-  filter: grayscale(0) contrast(1.05) brightness(1);
+  filter: grayscale(0) contrast(1.06) brightness(0.84);
+  will-change: transform, opacity;
 }
+/* legibility veil — keeps the white type crisp over any photo. Pure black,
+   weighted to the foot where the giant name + ledger live. */
 .sx__veil {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: linear-gradient(180deg, rgba(5,5,5,0) 55%, rgba(5,5,5,0.55) 100%);
+  background:
+    linear-gradient(180deg, rgba(4,4,4,0.74) 0%, rgba(4,4,4,0.30) 26%, rgba(4,4,4,0.30) 44%, rgba(4,4,4,0.86) 100%),
+    linear-gradient(90deg, rgba(4,4,4,0.62) 0%, rgba(4,4,4,0.0) 52%);
+}
+/* faint monochrome grain/vignette — quiet premium depth, no colour */
+.sx__grain {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  box-shadow: inset 0 0 220px 40px rgba(0,0,0,0.55);
 }
 
-/* caption under the frame — matched to the (possibly capped) frame width */
-.sx__caption {
-  width: var(--sx-fw);
+/* ============================================================
+   COMPOSITION — vertical slate stack inside one viewport
+   head (eyebrow + through-line) / feature (giant name) / ledger
+   Heights are budgeted against the viewport so nothing ever clips
+   at 1440x900 / 1366x768 / 1280x720.
+   ============================================================ */
+.sx__inner {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  min-height: 100svh;
   display: flex;
-  align-items: baseline;
-  gap: 1rem;
-  margin-top: clamp(0.7rem, 1.6vh, 1.1rem);
+  flex-direction: column;
+  padding-block: clamp(2rem, 5vh, 3.6rem);
 }
-.sx__capidx {
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
-  letter-spacing: 0.08em;
-  color: var(--paper-faint);
+
+/* ---- TOP: eyebrow left, "one standard" through-line right ---- */
+.sx__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
   flex: none;
 }
-.sx__capname {
-  font-family: var(--font-display);
-  font-weight: 400;
-  font-size: clamp(1.05rem, 1.8vw, 1.45rem);
-  letter-spacing: -0.01em;
-  color: var(--paper);
+.sx__through {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.9em;
+}
+.sx__through-line {
+  width: clamp(2.4rem, 8vw, 7rem);
+  height: 1px;
+  background: var(--hairline);
+  display: inline-block;
+}
+.sx__through-txt {
+  font-family: var(--font-mono);
+  font-size: clamp(0.62rem, 0.8vw, 0.72rem);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--paper-dim);
 }
 
-/* thin scrub progress bar — matched to the (possibly capped) frame width */
+/* ============================================================
+   CENTRE FEATURE — giant ghost count + kinetic name + film slate
+   This block owns the vertical slack so the stage breathes.
+   ============================================================ */
+.sx__feature {
+  flex: 1 1 auto;
+  min-height: 0;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* the big "12" sector count — treated as a structural design element,
+   a quiet ghost numeral pinned to the upper-right of the feature */
+.sx__count {
+  position: absolute;
+  top: clamp(-0.4rem, -1vh, 0.4rem);
+  right: 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(5rem, 16vh, 13rem);
+  line-height: 0.8;
+  letter-spacing: -0.03em;
+  color: transparent;
+  -webkit-text-stroke: 1px var(--hairline);
+  text-stroke: 1px var(--hairline);
+  user-select: none;
+  pointer-events: none;
+}
+
+/* the masked kinetic name stage — fixed height band, swaps wipe within */
+.sx__namestage {
+  position: relative;
+  /* one big line lives here; the band height is the type's cap so swaps
+     stay perfectly clipped. height-bounded for short laptops. */
+  height: clamp(3.4rem, 14vh, 8.4rem);
+  overflow: hidden;
+}
+.sx__big {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  max-width: 100%;
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  /* cap a touch under the budget so the widest name ('Industrial & logistics')
+     never bleeds past the wrap on a short-but-narrow laptop stage */
+  font-size: clamp(2.4rem, min(7.8vw, 11vh), 7rem);
+  line-height: 0.94;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+  color: var(--paper);
+}
+/* promote only the active name — the other 11 stay idle off the compositor */
+.sx__big.is-on {
+  will-change: transform, opacity;
+}
+
+/* film-slate counter under the name — reads 01 — 12 */
+.sx__slate {
+  margin-top: clamp(1rem, 2.6vh, 1.9rem);
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.7rem;
+  font-family: var(--font-mono);
+  flex: none;
+}
+.sx__slate-i {
+  font-size: clamp(0.9rem, 1.3vw, 1.15rem);
+  letter-spacing: 0.06em;
+  color: var(--paper);
+  font-variant-numeric: tabular-nums;
+}
+.sx__slate-sep { color: var(--paper-faint); font-size: 0.85rem; }
+.sx__slate-n {
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  color: var(--paper-faint);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ============================================================
+   BOTTOM LEDGER — the recessed mono spine: 12 indexed names in a
+   compact multi-column grid. Active leads (white), others recede.
+   ============================================================ */
+.sx__list {
+  flex: none;
+  list-style: none;
+  margin: 0;
+  padding-top: clamp(1rem, 2.4vh, 1.7rem);
+  border-top: 1px solid var(--hairline);
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-auto-flow: column;
+  grid-template-rows: repeat(4, auto);
+  column-gap: clamp(1.5rem, 4vw, 4rem);
+  row-gap: clamp(0.2rem, 0.9vh, 0.55rem);
+}
+.sx__row { position: relative; }
+.sx__item {
+  display: flex;
+  align-items: baseline;
+  gap: 0.85rem;
+  padding: clamp(0.18rem, 0.55vh, 0.4rem) 0;
+  cursor: pointer;
+  opacity: 0.45;
+  transform: translateX(0);
+  transition: opacity 0.45s var(--ease-out), transform 0.45s var(--ease-out);
+}
+.sx__idx {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.04em;
+  color: var(--paper-faint);
+  width: 1.6rem;
+  flex: none;
+  font-variant-numeric: tabular-nums;
+  transition: color 0.45s var(--ease-out);
+}
+.sx__name {
+  font-family: var(--font-sans);
+  font-weight: 400;
+  font-size: clamp(0.82rem, 1vw, 0.98rem);
+  line-height: 1.2;
+  letter-spacing: 0.005em;
+  color: var(--paper-dim);
+  white-space: nowrap;
+  transition: color 0.45s var(--ease-out);
+}
+/* a small leading tick that fills on the active row */
+.sx__tick {
+  position: absolute;
+  left: -0.9rem;
+  top: 50%;
+  width: 4px;
+  height: 4px;
+  margin-top: -2px;
+  border-radius: 50%;
+  background: var(--paper);
+  opacity: 0;
+  transform: scale(0.4);
+  transition: opacity 0.4s var(--ease-out), transform 0.4s var(--ease-out);
+}
+
+/* active ledger row — leads forward, ignites white, tick fills */
+.sx__row.is-active .sx__item {
+  opacity: 1;
+  transform: translateX(clamp(6px, 0.7vw, 12px));
+}
+.sx__row.is-active .sx__name { color: var(--paper); }
+.sx__row.is-active .sx__idx { color: var(--paper-dim); }
+.sx__row.is-active .sx__tick { opacity: 1; transform: scale(1); }
+
+/* mobile inline image — hidden on desktop */
+.sx__mobshot { display: none; }
+
+/* ============================================================
+   PROGRESS RAIL — thin scrub bar along the very foot of the stage
+   ============================================================ */
 .sx__progress {
-  margin-top: clamp(0.6rem, 1.2vh, 0.9rem);
-  height: 1px;
-  width: var(--sx-fw);
-  background: var(--hairline);
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+  height: 2px;
+  background: var(--hairline-soft);
   overflow: hidden;
 }
 .sx__progress span {
@@ -243,41 +288,67 @@
   transition: transform 0.6s var(--ease-out);
 }
 
-/* ============ MOBILE (<860px): no pin, vertical list w/ image below ============ */
+/* ============================================================
+   MOBILE (<860px): no pin, vertical list, each row owns its photo,
+   full colour. The cinematic stage + giant name are desktop-only.
+   ============================================================ */
 @media (max-width: 859px) {
   .sx__sticky {
     min-height: 0;
-    display: block;
     overflow: visible;
   }
-  .sx__body {
-    grid-template-columns: 1fr;
-    gap: 0;
-  }
-  /* no pinned-height budget on mobile — let the list flow naturally */
+  /* hide the full-bleed stage + the kinetic feature on mobile */
+  .sx__stage,
+  .sx__feature { display: none; }
+  .sx__progress { display: none; }
+
   .sx__inner {
+    min-height: 0;
     display: block;
-    max-height: none;
     padding-block: clamp(3rem, 9vh, 5rem);
   }
-  /* hide the sticky desktop preview entirely */
-  .sx__previewcol { display: none; }
+  .sx__head {
+    margin-bottom: clamp(2rem, 6vh, 3rem);
+  }
 
+  /* ledger becomes the section: one column, each row big + photo below */
+  .sx__list {
+    display: block;
+    border-top: 1px solid var(--hairline);
+    padding-top: clamp(1.5rem, 5vh, 2.4rem);
+  }
   .sx__row {
-    padding-bottom: 0.4rem;
+    border-bottom: 1px solid var(--hairline);
+    padding-bottom: 1.4rem;
+    margin-bottom: 1.4rem;
   }
+  .sx__row:last-child { border-bottom: none; }
   .sx__item {
+    opacity: 1;
     transform: none !important;
+    align-items: baseline;
+    gap: 1.1rem;
+    padding: 0 0 0.9rem;
   }
-  /* every row shows its own photo, full colour, fade-up handled by GSAP */
-  .sx__name { color: var(--paper); }
-  .sx__arrow { opacity: 0.55; transform: none; }
+  .sx__idx {
+    font-size: 0.72rem;
+    width: 2rem;
+    color: var(--paper-faint);
+  }
+  .sx__name {
+    font-family: var(--font-display);
+    font-size: clamp(1.5rem, 7vw, 2.3rem);
+    line-height: 1.04;
+    letter-spacing: -0.015em;
+    color: var(--paper);
+    white-space: normal;
+  }
+  .sx__tick { display: none; }
 
   .sx__mobshot {
     display: block;
     width: 100%;
     aspect-ratio: 16 / 11;
-    margin: 0.2rem 0 1.4rem;
     background-size: cover;
     background-position: center;
     border-radius: 2px;
@@ -286,10 +357,19 @@
   }
 }
 
-/* ============ REDUCED MOTION ============ */
+/* ============================================================
+   REDUCED MOTION — clean static final state, no transitions
+   ============================================================ */
 @media (prefers-reduced-motion: reduce) {
-  .sx__item, .sx__pimg, .sx__arrow, .sx__name, .sx__idx, .sx__progress span {
+  .sx__pimg,
+  .sx__item,
+  .sx__name,
+  .sx__idx,
+  .sx__tick,
+  .sx__big,
+  .sx__progress span {
     transition: none !important;
   }
   .sx__pimg { transform: none !important; }
+  .sx__big.is-on { transform: none !important; opacity: 1 !important; }
 }

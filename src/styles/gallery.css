@@ -1,0 +1,41 @@
+/* ============================================================
+   ProjectsGallery overrides — caption (name-first, then address)
+   + larger centred hero card. Loaded LAST so it overrides the
+   legacy .pg / .pg__caption rules in premium.css. Monochrome.
+   ============================================================ */
+
+/* ---- CHANGE 2: roomier stage so the EXPANDED centre plate (JS scales
+   it up to ~1.18) never clips top/bottom inside the hidden viewport.
+   overflow stays hidden to crop the horizontal track; padding-block
+   supplies the vertical breathing room for the grown + lifted cards.
+   Desktop-only — mobile keeps premium.css's padding-block:0 stack. */
+@media (min-width: 861px) {
+  .pg__viewport {
+    padding-block: clamp(86px, 15vh, 184px);
+  }
+}
+
+/* ---- CHANGE 1: caption is a vertical lockup — NAME leads (big,
+   clickable button on top), then the index — address beneath it.
+   (Flips the legacy address-then-name order.) Clean monochrome.
+   Desktop-only so the mobile `display:none` (premium.css) still wins. */
+@media (min-width: 861px) {
+  .pg__caption {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: clamp(14px, 1.8vh, 24px);
+  }
+}
+
+/* name button now sits first; drop nothing, just lead the stack */
+.pg__caption-btn {
+  order: 0;
+}
+
+/* address / meta now follows the name; clear the legacy bottom gap that
+   used to separate meta (above) from name (below) in the old order */
+.pg__caption-meta {
+  order: 1;
+  margin-bottom: 0;
+}

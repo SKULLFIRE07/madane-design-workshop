@@ -93,7 +93,7 @@ export function Hero({ started = false }) {
 
         <h1 className="hero__headline" ref={headline}>
           <span className="hero__line"><span className="ln">we design</span></span>
-          <span className="hero__line"><span className="ln">&amp; build</span> <span className="ln hero__bharat">bharat</span></span>
+          <span className="hero__line"><span className="ln">&amp; build</span> <span className="ln hero__bharat" lang="hi">भारत</span></span>
         </h1>
 
         <div className="hero__rally">think to innovate</div>

@@ -1,0 +1,400 @@
+/* ============================================================
+   PhilosophyReveal — redesigned. Loaded LAST so it overrides the
+   legacy .pr / .pr__* rules in premium.css. The RIGHT column now
+   reads as full + intentional the instant the beat is in view:
+   vertical index · eyebrow · lede · big Fraunces headline · body ·
+   spec line · "read the studio" link. Strictly monochrome.
+
+   KEY FIX: the CSS rest state of every reveal element is its FINAL
+   VISIBLE state. GSAP only plays an on-enter rise (gsap.from). So
+   nothing is ever invisible at rest — no blank column on load, HMR,
+   refresh, or reduced-motion.
+   ============================================================ */
+
+.pr {
+  position: relative;
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.pr__sticky {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+}
+
+.pr__grid {
+  width: 100%;
+  display: grid;
+  /* a touch more room for the photo; text column breathes wider */
+  grid-template-columns: 53% 47%;
+  align-items: center;
+  gap: clamp(2.5rem, 6vw, 7rem);
+  padding: 0 clamp(1.5rem, 6vw, 8rem);
+}
+
+/* ---- media (kept: clip wipe + parallax/scale settle) ---- */
+.pr__media {
+  position: relative;
+  /* cap to 76vh so the photo never crowds the pinned 100vh and leaves
+     vertical headroom for the text column on short viewports */
+  height: clamp(340px, 76vh, 860px);
+  overflow: hidden;
+  /* the clip-wipe origin lives here */
+  clip-path: inset(0 0% 0 0);
+}
+
+.pr__img {
+  position: absolute;
+  inset: -8% -16%;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  filter: grayscale(1) contrast(1.05) brightness(0.9);
+  will-change: transform;
+  transform: translateZ(0);
+}
+
+.pr__media::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    100deg,
+    rgba(4, 4, 4, 0.5) 0%,
+    rgba(4, 4, 4, 0.1) 46%,
+    rgba(4, 4, 4, 0.46) 100%
+  );
+  pointer-events: none;
+}
+
+.pr__imgline {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 1px;
+  background: var(--hairline);
+  pointer-events: none;
+}
+
+/* ============================================================
+   TEXT COLUMN — vertical index gutter + editorial content column.
+   ============================================================ */
+.pr__text {
+  position: relative;
+  will-change: transform;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: start;
+  column-gap: clamp(1.5rem, 2.6vw, 2.6rem);
+  max-width: 46ch;
+}
+
+/* vertical index rail: 01 — 05, mono, faint. Gives the column weight. */
+.pr__index {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(0.7rem, 1.4vw, 1.1rem);
+  font-family: var(--font-mono);
+  font-size: clamp(0.6rem, 0.74vw, 0.7rem);
+  letter-spacing: 0.18em;
+  /* nudge the rail to align with the cap-height of the lede */
+  padding-top: 0.35rem;
+  user-select: none;
+}
+.pr__index-num {
+  color: var(--paper);
+}
+.pr__index-total {
+  color: var(--paper-faint);
+}
+.pr__index-rule {
+  width: 1px;
+  height: clamp(34px, 6vw, 58px);
+  background: var(--hairline);
+}
+
+/* the content column itself */
+.pr__col {
+  min-width: 0;
+}
+
+.pr__eyebrow {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: clamp(0.62rem, 0.78vw, 0.72rem);
+  letter-spacing: 0.34em;
+  text-transform: uppercase;
+  color: var(--paper-faint);
+  margin: 0 0 clamp(0.85rem, 1.5vw, 1.1rem);
+}
+
+/* hairline that draws in under the eyebrow (on-enter) */
+.pr__line {
+  display: block;
+  height: 1px;
+  width: clamp(40px, 6vw, 80px);
+  background: rgba(255, 255, 255, 0.3);
+  transform-origin: left center;
+  margin: 0 0 clamp(1.5rem, 3vw, 2.2rem);
+  will-change: transform;
+}
+
+/* short Fraunces lede ABOVE the headline — kills the dead zone, sets tone */
+.pr__lede {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-style: italic;
+  font-size: clamp(1.05rem, 1.5vw, 1.55rem);
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  color: var(--paper);
+  margin: 0 0 clamp(1.1rem, 2.2vw, 1.7rem);
+  max-width: 26ch;
+}
+
+/* ---- headline: descender-safe word masks ----
+   REST STATE = visible (translateY(0)). The mask still clips the
+   on-enter rise; the words are present at rest. */
+.pr__headline {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(2.2rem, 4.1vw, 4.5rem);
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  margin: 0 0 clamp(1.6rem, 3vw, 2.4rem);
+  color: var(--paper);
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: 0.26em;
+  row-gap: 0;
+}
+
+.pr__wmask {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: top;
+  /* top breathing room + generous bottom room for descenders */
+  padding: 0.06em 0.02em 0.2em;
+}
+
+.pr__word {
+  display: inline-block;
+  will-change: transform;
+  /* VISIBLE at rest — gsap.from() supplies the 100% start of the rise */
+  transform: translateY(0);
+}
+
+.pr__body {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(1rem, 1.18vw, 1.2rem);
+  line-height: 1.68;
+  color: var(--paper-dim);
+  margin: 0 0 clamp(1.7rem, 3.2vw, 2.6rem);
+  max-width: 38ch;
+  will-change: transform, opacity;
+}
+
+/* spec line + link grouped so they reveal together */
+.pr__tail {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(1.4rem, 2.6vw, 2rem);
+  will-change: transform, opacity;
+}
+
+/* small mono spec line: est. 2008 · architecture · interiors · turnkey */
+.pr__spec {
+  list-style: none;
+  margin: 0;
+  padding: clamp(1rem, 1.8vw, 1.3rem) 0 0;
+  border-top: 1px solid var(--hairline-soft);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6em 0.95em;
+  font-family: var(--font-mono);
+  font-size: clamp(0.6rem, 0.76vw, 0.72rem);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--paper-faint);
+}
+.pr__spec-item {
+  display: inline-flex;
+  align-items: center;
+}
+.pr__spec-item:not(:last-child)::after {
+  content: '';
+  width: 3px;
+  height: 3px;
+  margin-left: 0.95em;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.28);
+}
+/* the first item (est. year) reads as the anchor — slightly brighter */
+.pr__spec-item:first-child {
+  color: var(--paper-dim);
+}
+
+/* ---- "read the studio" link ---- */
+.pr__more {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  text-decoration: none;
+  width: max-content;
+}
+
+.pr__more-label {
+  font-family: var(--font-mono);
+  font-size: clamp(0.66rem, 0.8vw, 0.74rem);
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.86);
+  transition: color 0.4s var(--ease-out);
+}
+
+.pr__more-rule {
+  height: 1px;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.24);
+  transform-origin: left center;
+  transform: scaleX(0.5);
+  transition: transform 0.55s var(--ease-out), background 0.4s var(--ease-out);
+}
+
+.pr__more:hover .pr__more-label,
+.pr__more:focus-visible .pr__more-label {
+  color: var(--paper);
+}
+.pr__more:hover .pr__more-rule,
+.pr__more:focus-visible .pr__more-rule {
+  transform: scaleX(1);
+  background: rgba(255, 255, 255, 0.55);
+}
+
+/* ============================================================
+   SHORT DESKTOP VIEWPORTS (e.g. 1366x768, 1280x720): the pinned
+   sticky is exactly 100vh and clips with overflow:hidden, so the
+   taller text column (index · eyebrow · lede · big headline · body ·
+   spec · link) must compress to fit. Tighten type + vertical rhythm
+   so nothing clips top/bottom. Desktop width only (mobile unpins).
+   ============================================================ */
+@media (min-width: 861px) and (max-height: 820px) {
+  .pr__media {
+    height: min(72vh, 560px);
+  }
+  .pr__lede {
+    font-size: clamp(1rem, 1.3vw, 1.3rem);
+    margin-bottom: clamp(0.8rem, 1.4vw, 1.1rem);
+  }
+  .pr__headline {
+    font-size: clamp(1.9rem, 3.2vw, 3.4rem);
+    line-height: 1.06;
+    margin-bottom: clamp(1.1rem, 2vw, 1.6rem);
+  }
+  .pr__line {
+    margin-bottom: clamp(1rem, 2vw, 1.5rem);
+  }
+  .pr__body {
+    font-size: clamp(0.95rem, 1.05vw, 1.08rem);
+    line-height: 1.55;
+    margin-bottom: clamp(1.1rem, 2vw, 1.6rem);
+  }
+  .pr__tail {
+    gap: clamp(1rem, 1.8vw, 1.4rem);
+  }
+  .pr__spec {
+    padding-top: clamp(0.8rem, 1.4vw, 1rem);
+  }
+}
+
+/* ============================================================
+   MOBILE (<860px): stack, no pin, index rail goes horizontal.
+   ============================================================ */
+@media (max-width: 860px) {
+  .pr__sticky {
+    min-height: auto;
+    display: block;
+    padding: clamp(3rem, 9vw, 5rem) 0;
+  }
+
+  .pr__grid {
+    grid-template-columns: 1fr;
+    gap: clamp(1.8rem, 6vw, 2.8rem);
+  }
+
+  .pr__media {
+    height: clamp(280px, 58vh, 520px);
+    clip-path: none !important;
+  }
+
+  .pr__img {
+    inset: 0;
+    transform: none !important;
+  }
+
+  .pr__text {
+    transform: none !important;
+    max-width: none;
+    grid-template-columns: 1fr;
+    row-gap: clamp(1.1rem, 4vw, 1.6rem);
+  }
+
+  /* index rail becomes a horizontal marker above the eyebrow */
+  .pr__index {
+    flex-direction: row;
+    align-items: center;
+    gap: 0.7rem;
+    padding-top: 0;
+  }
+  .pr__index-rule {
+    width: clamp(26px, 9vw, 44px);
+    height: 1px;
+  }
+
+  .pr__lede {
+    font-size: clamp(1.1rem, 4.6vw, 1.5rem);
+    max-width: none;
+  }
+
+  .pr__headline {
+    font-size: clamp(2.05rem, 8.4vw, 3.1rem);
+  }
+
+  .pr__body {
+    max-width: none;
+  }
+}
+
+/* ============================================================
+   prefers-reduced-motion: everything is already at its final
+   visible state via the CSS rest rules above — just hard-stop any
+   transform the legacy rules might apply.
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  .pr__media {
+    clip-path: none !important;
+  }
+  .pr__img,
+  .pr__text {
+    transform: none !important;
+  }
+  .pr__word {
+    transform: none !important;
+    clip-path: none !important;
+  }
+  .pr__line {
+    transform: scaleX(1) !important;
+  }
+  .pr__lede,
+  .pr__body,
+  .pr__tail {
+    transform: none !important;
+    opacity: 1 !important;
+  }
+}

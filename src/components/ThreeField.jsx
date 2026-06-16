@@ -4,8 +4,8 @@ import * as THREE from 'three'
 
 /**
  * Light "blueprint topography" · a low-poly displaced point grid.
- * Performance-hardened: ~3k points, normal blending, dpr<=1.25,
- * rendered on-demand and throttled to ~30fps, paused when offscreen.
+ * Performance-hardened: ~2.1k points, normal blending, dpr<=1.1,
+ * rendered on-demand and throttled to ~26fps, paused when offscreen.
  * Strictly an optional flourish · the CSS hero stands on its own.
  */
 
@@ -52,7 +52,10 @@ const fragment = /* glsl */ `
 function Grid({ pausedRef }) {
   const { invalidate } = useThree()
   const ptr = useRef(new THREE.Vector2(0, 0))
-  const geometry = useMemo(() => new THREE.PlaneGeometry(28, 16, 96, 56), [])
+  // Coarser grid: ~2.1k pts (61x34) vs the old 96x56 (~5.5k). The shader
+  // displacement is smooth/low-frequency, so the silhouette barely changes
+  // while vertex + point-fill cost drops by ~60%.
+  const geometry = useMemo(() => new THREE.PlaneGeometry(28, 16, 60, 34), [])
   useEffect(() => () => geometry.dispose(), [geometry])
 
   const uniforms = useMemo(
@@ -71,14 +74,14 @@ function Grid({ pausedRef }) {
     uniforms.uPointer.value.copy(ptr.current)
   })
 
-  // throttled on-demand driver (~30fps), pauses when offscreen / tab hidden
+  // throttled on-demand driver (~26fps), pauses when offscreen / tab hidden
   useEffect(() => {
     let raf
     let last = 0
     const loop = (t) => {
       raf = requestAnimationFrame(loop)
       if (pausedRef.current || document.hidden) return
-      if (t - last < 33) return
+      if (t - last < 38) return
       last = t
       invalidate()
     }
@@ -98,7 +101,7 @@ export function ThreeField({ pausedRef }) {
     <div className="three-field" aria-hidden>
       <Canvas
         frameloop="demand"
-        dpr={[1, 1.25]}
+        dpr={[1, 1.1]}
         camera={{ position: [0, 2.4, 8.5], fov: 42 }}
         gl={{ antialias: false, alpha: true, powerPreference: 'low-power', failIfMajorPerformanceCaveat: false }}
       >

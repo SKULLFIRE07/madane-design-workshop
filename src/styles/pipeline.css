@@ -13,7 +13,7 @@
   align-items: stretch;
   justify-content: center;
   gap: clamp(1.6rem, 3vw, 2.8rem);
-  width: clamp(720px, 84vw, 1180px);
+  width: clamp(820px, 92vw, 1360px);
   border-left: none;
   margin-left: clamp(1.5rem, 4vw, 4rem);
   padding: clamp(2rem, 4vw, 3.4rem) var(--pad-x) clamp(2rem, 4vw, 3.4rem) clamp(2rem, 4vw, 3.4rem);
@@ -68,7 +68,7 @@
   padding: 0;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: clamp(0.6rem, 1.6vw, 1.4rem);
+  gap: clamp(1.6rem, 3vw, 3rem);
 }
 .pipe__step {
   position: relative;
@@ -121,13 +121,13 @@
   display: block;
   font-family: var(--font-display);
   font-weight: 600;
-  font-size: clamp(1.5rem, 2.7vw, 2.5rem);
+  font-size: clamp(1.3rem, 2.1vw, 2.05rem);
   line-height: 1.0;
-  letter-spacing: -0.015em;
+  letter-spacing: -0.02em;
   text-transform: lowercase;
   color: var(--paper);
   white-space: nowrap;
-  will-change: transform, opacity, filter;
+  will-change: transform, opacity;
 }
 /* the legacy `.cap__end p` / `span` colour rules don't reach these
    (words are .pipe__word spans); .pipe prefix keeps us above them. */
@@ -147,11 +147,12 @@
    No CSS transform here — GSAP owns `x` for the draw-in tween. */
 .pipe .pipe__arrow {
   position: absolute;
-  top: clamp(3.1rem, 4.4vw, 4.2rem);   /* sits on the word row, below index */
-  right: clamp(-1rem, -1.3vw, -0.6rem);
+  top: clamp(2.7rem, 3.8vw, 3.7rem);   /* sits on the word row, below index */
+  /* centre the glyph in the inter-step gutter (≈ half the grid gap) */
+  right: clamp(-1.5rem, -1.5vw, -0.95rem);
   font-family: var(--font-display);
-  font-size: clamp(1.1rem, 1.8vw, 1.6rem);
-  line-height: clamp(1.5rem, 2.7vw, 2.5rem);
+  font-size: clamp(1rem, 1.5vw, 1.4rem);
+  line-height: clamp(1.3rem, 2.1vw, 2.05rem);
   color: var(--paper-faint);
   pointer-events: none;
   will-change: transform, opacity;

@@ -27,6 +27,10 @@ import './styles/mature.css'
 import './styles/sectors.css'
 import './styles/pipeline.css'
 import './styles/charts.css'
+import './styles/gallery.css'
+import './styles/manifesto.css'
+import './styles/edge.css'
+import './styles/philosophy.css'
 
 export default function App() {
   const [loaded, setLoaded] = useState(false)
