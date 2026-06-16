@@ -113,5 +113,15 @@ h1, h2, h3, h4 { font-weight: 400; }
 .pr__wmask { display: inline-block; overflow: hidden; padding: 0.06em 0.02em 0.22em; vertical-align: top; }
 .pr__word { display: inline-block; will-change: transform; }
 
+/* ---- studio: real B&W partner portraits (replace broken mono discs) ---- */
+.partner__mono { display: none !important; }
+.partner__photo {
+  display: block; width: 72px; height: 72px; border-radius: 50%;
+  background-size: cover; background-position: center 25%;
+  filter: grayscale(1) contrast(1.06) brightness(1.02); border: 1px solid var(--hairline);
+  margin-bottom: 1.3rem; transition: filter 0.55s var(--ease-out);
+}
+.partner:hover .partner__photo { filter: grayscale(0) contrast(1.04); }
+
 /* ---- focus ---- */
 :focus-visible { outline-color: #fff; }

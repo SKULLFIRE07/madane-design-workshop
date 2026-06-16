@@ -40,7 +40,7 @@ export function Studio() {
         <div className="studio__partners">
           {team.map((m, i) => (
             <FadeUp className="partner" key={m.name} delay={i * 0.08} data-cursor="">
-              <span className="partner__mono">{m.name.split(' ').map((w) => w[0]).slice(0, 2).join('')}</span>
+              <span className="partner__photo" style={{ backgroundImage: `url(${m.img})` }} aria-label={m.name} />
               <h3>{m.name}</h3>
               <div className="partner__role">{m.role}</div>
               <p className="partner__cred">{m.cred}</p>

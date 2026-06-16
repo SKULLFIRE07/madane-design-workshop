@@ -108,9 +108,9 @@ export const why = [
 ]
 
 export const team = [
-  { name: 'Hrishikesh Madane', role: 'architecture & interiors', cred: 'M.Arch, IIT Chicago · ex-Adrian Smith + Gordon Gill', img: hero(70) },
-  { name: 'Rasika Madane', role: 'design studio head', cred: 'President of India Gold Medalist · ex-Hafeez Contractor', img: hero(77) },
-  { name: 'Akshay Madane', role: 'contracts & compliance', cred: 'Intl. Hospitality Mgmt · ex-Taj Lands End', img: hero(47) },
+  { name: 'Hrishikesh Madane', role: 'architecture & interiors', cred: 'M.Arch, IIT Chicago · ex-Adrian Smith + Gordon Gill', img: '/assets/team/hrishikesh.jpg' },
+  { name: 'Rasika Madane', role: 'design studio head', cred: 'President of India Gold Medalist · ex-Hafeez Contractor', img: '/assets/team/rasika.jpg' },
+  { name: 'Akshay Madane', role: 'contracts & compliance', cred: 'Intl. Hospitality Mgmt · ex-Taj Lands End', img: '/assets/team/akshay.jpg' },
 ]
 
 export const orgTeam = [

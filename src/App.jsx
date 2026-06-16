@@ -33,13 +33,17 @@ export default function App() {
 
   const onComplete = useCallback(() => setLoaded(true), [])
 
-  // recalc all pinned-scroll positions once layout is stable (prevents jumps)
+  // CRITICAL: Fraunces loads async and shifts layout, which throws every
+  // ScrollTrigger position off (content appears pre-revealed = looks static).
+  // Refresh after fonts load + on resize so all section reveals fire correctly.
   useEffect(() => {
     if (!loaded) return
     const refresh = () => ScrollTrigger.refresh()
-    const ids = [gsap.delayedCall(0.3, refresh), gsap.delayedCall(1.2, refresh)]
+    const ids = [gsap.delayedCall(0.4, refresh), gsap.delayedCall(1.4, refresh), gsap.delayedCall(3, refresh)]
     window.addEventListener('load', refresh)
-    return () => { ids.forEach((c) => c.kill()); window.removeEventListener('load', refresh) }
+    window.addEventListener('resize', refresh)
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(refresh)
+    return () => { ids.forEach((c) => c.kill()); window.removeEventListener('load', refresh); window.removeEventListener('resize', refresh) }
   }, [loaded])
 
   // lock scroll when overlay open
