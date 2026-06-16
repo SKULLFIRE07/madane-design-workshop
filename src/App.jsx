@@ -24,6 +24,7 @@ import './styles/sections.css'
 import './styles/refine.css'
 import './styles/premium.css'
 import './styles/mature.css'
+import './styles/sectors.css'
 
 export default function App() {
   const [loaded, setLoaded] = useState(false)

@@ -15,12 +15,21 @@ export function Stats() {
     if (!el) return
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     const ctx = gsap.context(() => {
-      // world map fades up once
-      gsap.from('.stats__land', {
-        opacity: 0, y: 24, duration: 1.2, ease: 'power3.out',
+      if (reduce) { gsap.set('.stats__land', { clipPath: 'inset(0 0 0 0)' }); return }
+      // world map "draws" in left-to-right, then parallax-drifts as you scroll through
+      gsap.fromTo('.stats__land',
+        { clipPath: 'inset(0 100% 0 0)', opacity: 0.4 },
+        { clipPath: 'inset(0 0% 0 0)', opacity: 1, duration: 1.8, ease: 'power3.out',
+          scrollTrigger: { trigger: '.stats__mapwrap', start: 'top 80%', once: true } })
+      gsap.to('.stats__land', {
+        yPercent: -10, ease: 'none',
+        scrollTrigger: { trigger: '.stats__mapwrap', start: 'top bottom', end: 'bottom top', scrub: true },
+      })
+      // worldwide chips + maphead reveal
+      gsap.from('.stats__maphead, .stats__world', {
+        opacity: 0, y: 18, duration: 0.8, stagger: 0.1, ease: 'power3.out',
         scrollTrigger: { trigger: '.stats__mapwrap', start: 'top 82%', once: true },
       })
-      if (reduce) return
       // stats appear one after the other on scroll
       gsap.from('.stat', {
         opacity: 0, y: 22, duration: 0.7, ease: 'power3.out', stagger: 0.12,

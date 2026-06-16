@@ -146,8 +146,10 @@
   .lr { display: none; }
 }
 /* ============================================================
-   ProjectsGallery · pinned horizontal works gallery
-   pure monochrome chrome · photos are the only colour
+   ProjectsGallery · pinned horizontal "zoom-then-slide" gallery
+   Centre card zooms to a hero plate in full colour; neighbours
+   shrink, lift and desaturate. Pure monochrome chrome — the
+   project PHOTOS are the only colour.
    ============================================================ */
 
 .pg {
@@ -159,21 +161,7 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: clamp(96px, 12vh, 160px) 0 clamp(72px, 9vh, 120px);
-}
-
-/* faint monochrome grid behind everything */
-.pg__grid {
-  position: absolute;
-  inset: -1px;
-  pointer-events: none;
-  z-index: 0;
-  background-image:
-    linear-gradient(to right, rgba(255, 255, 255, 0.045) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.045) 1px, transparent 1px);
-  background-size: clamp(80px, 8vw, 120px) clamp(80px, 8vw, 120px);
-  mask-image: radial-gradient(120% 90% at 50% 45%, #000 35%, transparent 100%);
-  -webkit-mask-image: radial-gradient(120% 90% at 50% 45%, #000 35%, transparent 100%);
+  padding: clamp(72px, 9vh, 120px) 0 clamp(56px, 7vh, 96px);
 }
 
 /* ---- header: eyebrow + index counter ---- */
@@ -184,14 +172,13 @@
   justify-content: space-between;
   align-items: baseline;
   padding: 0 clamp(20px, 5vw, 80px);
-  margin-bottom: clamp(28px, 4vh, 56px);
+  margin-bottom: clamp(24px, 3.5vh, 48px);
 }
 
 .pg__eyebrow {
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
   font-size: clamp(11px, 0.8vw, 13px);
-  letter-spacing: 0.32em;
-  text-transform: uppercase;
+  letter-spacing: 0.2em;
   color: rgba(255, 255, 255, 0.55);
 }
 
@@ -203,6 +190,7 @@
   display: inline-flex;
   align-items: baseline;
   gap: 0.3em;
+  font-variant-numeric: tabular-nums;
 }
 .pg__count-cur { color: #fff; }
 .pg__count-sep { color: rgba(255, 255, 255, 0.28); }
@@ -213,21 +201,25 @@
   z-index: 2;
   width: 100%;
   overflow: hidden;
+  /* roomy stage so the zoomed centre plate never clips top/bottom */
+  padding-block: clamp(40px, 8vh, 96px);
 }
 
 .pg__track {
   display: flex;
   align-items: center;
-  gap: clamp(40px, 5vw, 96px);
-  padding: 0 calc(50vw - clamp(220px, 26vw, 420px) / 2);
+  gap: clamp(48px, 6vw, 120px);
+  /* first & last card can reach dead-centre */
+  padding: 0 calc(50vw - clamp(180px, 19vw, 300px) / 2);
   will-change: transform;
 }
 
-/* ---- card ---- */
+/* ---- card: width is the NEIGHBOUR size; JS scale lifts it to hero ---- */
 .pg__card {
+  --g: 1; /* greyscale amount, driven by JS (1 = mono, 0 = full colour) */
   position: relative;
   flex: 0 0 auto;
-  width: clamp(220px, 26vw, 420px);
+  width: clamp(180px, 19vw, 300px);
   cursor: pointer;
   will-change: transform, opacity;
   outline: none;
@@ -235,13 +227,13 @@
 
 .pg__card-idx {
   position: absolute;
-  top: -1.9em;
+  top: -2em;
   left: 0;
   font-family: var(--font-mono);
-  font-size: clamp(10px, 0.75vw, 12px);
+  font-size: clamp(10px, 0.72vw, 12px);
   letter-spacing: 0.25em;
-  color: rgba(255, 255, 255, 0.3);
-  transition: color 0.4s ease;
+  color: rgba(255, 255, 255, 0.28);
+  transition: color 0.45s ease;
 }
 .pg__card.is-active .pg__card-idx { color: rgba(255, 255, 255, 0.85); }
 
@@ -252,46 +244,61 @@
   overflow: hidden;
   background: #0c0c0c;
   border: 1px solid rgba(255, 255, 255, 0.08);
+  /* greyscale + a touch of dim on neighbours, both keyed to --g */
+  filter:
+    grayscale(calc(var(--g) * 1))
+    brightness(calc(1 - var(--g) * 0.16))
+    contrast(calc(1 + (1 - var(--g)) * 0.04));
 }
 .pg__media img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
-  filter: grayscale(0.45) contrast(1.02) brightness(0.82);
-  transform: scale(1.04);
-  transition: filter 0.6s ease, transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
-}
-.pg__card.is-active .pg__media img {
-  filter: grayscale(0) contrast(1.04) brightness(1);
-  transform: scale(1);
+  /* gentle parallax breathing — centre eases to 1, neighbours sit at 1.05 */
+  transform: scale(calc(1 + var(--g) * 0.05));
+  transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .pg__media-veil {
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(5, 5, 5, 0.1) 0%, rgba(5, 5, 5, 0.55) 100%);
-  opacity: 0.7;
-  transition: opacity 0.6s ease;
+  background: linear-gradient(180deg, rgba(5, 5, 5, 0.06) 0%, rgba(5, 5, 5, 0.5) 100%);
+  /* darker veil on neighbours, lifts on the centred plate */
+  opacity: calc(0.18 + var(--g) * 0.42);
   pointer-events: none;
 }
-.pg__card.is-active .pg__media-veil { opacity: 0.2; }
 
 .pg__card:focus-visible .pg__media {
   border-color: rgba(255, 255, 255, 0.6);
 }
 
-/* inline meta hidden on desktop (shared caption used instead) */
+/* inline meta hidden on desktop (shared hero caption used instead) */
 .pg__card-meta { display: none; }
 
-/* ---- shared active caption (desktop) ---- */
+/* ---- shared hero caption (desktop): names the CENTRED project ---- */
 .pg__caption {
   position: relative;
   z-index: 3;
-  margin-top: clamp(32px, 5vh, 64px);
+  margin-top: clamp(20px, 3vh, 40px);
   padding: 0 clamp(20px, 5vw, 80px);
-  min-height: clamp(72px, 9vh, 110px);
+  min-height: clamp(96px, 12vh, 150px);
 }
+
+.pg__caption-meta {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.8em;
+  margin-bottom: 0.7em;
+  font-family: var(--font-mono);
+  font-size: clamp(11px, 0.85vw, 14px);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.5);
+}
+.pg__caption-idx { color: #fff; font-variant-numeric: tabular-nums; }
+.pg__caption-sep { color: rgba(255, 255, 255, 0.3); }
+.pg__caption-loc { color: rgba(255, 255, 255, 0.55); }
 
 .pg__caption-btn {
   appearance: none;
@@ -302,42 +309,25 @@
   cursor: pointer;
   display: inline-flex;
   align-items: center;
-  gap: clamp(20px, 3vw, 48px);
+  gap: clamp(24px, 3vw, 56px);
   text-align: left;
-}
-
-.pg__caption-text {
-  display: flex;
-  flex-direction: column;
-  gap: 0.4em;
 }
 
 .pg__caption-name {
   font-family: var(--font-display);
-  font-size: clamp(34px, 5.5vw, 84px);
-  line-height: 0.96;
+  font-size: clamp(40px, 6.4vw, 96px);
+  font-weight: 400;
+  line-height: 0.94;
   letter-spacing: -0.02em;
   color: #fff;
-}
-
-.pg__caption-sub {
-  font-family: var(--font-mono);
-  font-size: clamp(11px, 0.85vw, 14px);
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.5);
-  display: inline-flex;
-  align-items: center;
-  gap: 0.6em;
-  flex-wrap: wrap;
 }
 
 .pg__dot { color: rgba(255, 255, 255, 0.3); }
 
 .pg__arrow {
   flex: 0 0 auto;
-  width: clamp(56px, 6vw, 84px);
-  height: clamp(56px, 6vw, 84px);
+  width: clamp(58px, 6vw, 88px);
+  height: clamp(58px, 6vw, 88px);
   border: 1px solid rgba(255, 255, 255, 0.25);
   border-radius: 50%;
   display: grid;
@@ -345,43 +335,43 @@
   color: #fff;
   transition: background 0.45s ease, color 0.45s ease, border-color 0.45s ease, transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
 }
-.pg__caption-btn:hover .pg__arrow {
+.pg__caption-btn:hover .pg__arrow,
+.pg__caption-btn:focus-visible .pg__arrow {
   background: #fff;
   color: #050505;
   border-color: #fff;
   transform: translateX(8px);
 }
-.pg__arrow svg { width: 40%; height: 40%; }
+.pg__arrow svg { width: 38%; height: 38%; }
 
 /* ============================================================
-   MOBILE (<861px): no pin, no horizontal · clean vertical stack
+   MOBILE (<861px): no pin, no horizontal · vertical full-bleed plates
    ============================================================ */
 @media (max-width: 860px) {
   .pg {
     min-height: auto;
     display: block;
-    padding: clamp(72px, 12vh, 110px) 0;
-  }
-  .pg__grid {
-    background-size: 64px 64px;
-    mask-image: radial-gradient(140% 80% at 50% 30%, #000 30%, transparent 100%);
-    -webkit-mask-image: radial-gradient(140% 80% at 50% 30%, #000 30%, transparent 100%);
+    padding: clamp(64px, 11vh, 100px) 0;
   }
 
   .pg__head { margin-bottom: 32px; }
 
-  .pg__viewport { overflow: visible; }
+  .pg__viewport {
+    overflow: visible;
+    padding-block: 0;
+  }
 
   .pg__track {
     display: flex;
     flex-direction: column;
-    gap: clamp(56px, 9vw, 80px);
+    gap: clamp(56px, 11vw, 88px);
     padding: 0 clamp(20px, 6vw, 40px);
     transform: none !important; /* never moved on mobile */
     will-change: auto;
   }
 
   .pg__card {
+    --g: 0; /* full colour on mobile */
     width: 100%;
     transform: none !important;
     opacity: 1 !important;
@@ -394,21 +384,19 @@
     color: rgba(255, 255, 255, 0.4);
   }
 
-  .pg__media { aspect-ratio: 4 / 5; }
-  .pg__media img {
-    filter: grayscale(0) brightness(1);
-    transform: scale(1);
-  }
+  .pg__media { aspect-ratio: 4 / 5; filter: none; }
+  .pg__media img { transform: scale(1); }
   .pg__media-veil { opacity: 0.25; }
 
-  /* show inline meta, hide the shared desktop caption */
+  /* show inline meta, hide the shared desktop hero caption */
   .pg__card-meta {
     display: block;
     margin-top: 20px;
   }
   .pg__card-name {
     font-family: var(--font-display);
-    font-size: clamp(28px, 8vw, 46px);
+    font-size: clamp(30px, 8.5vw, 48px);
+    font-weight: 400;
     line-height: 0.98;
     letter-spacing: -0.02em;
     color: #fff;
@@ -432,8 +420,14 @@
 @media (prefers-reduced-motion: reduce) {
   .pg__media img,
   .pg__media-veil,
+  .pg__media,
   .pg__arrow { transition: none; }
 }
+/* ============================================================
+   PHILOSOPHY REVEAL — pinned editorial beat.
+   Image left (~55%) parallax + scale settle; text right with
+   descender-safe word line-masks (translateY reveal ONLY).
+   ============================================================ */
 .pr {
   position: relative;
   background: #050505;
@@ -461,12 +455,12 @@
   position: relative;
   height: clamp(360px, 78vh, 880px);
   overflow: hidden;
-  will-change: transform;
 }
 
 .pr__img {
   position: absolute;
-  inset: -6% -12%;
+  /* extra bleed so the right->left parallax never exposes an edge */
+  inset: -8% -16%;
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -512,33 +506,50 @@
   letter-spacing: 0.32em;
   text-transform: uppercase;
   color: rgba(255, 255, 255, 0.5);
-  margin-bottom: clamp(1.4rem, 3vw, 2.4rem);
+  margin-bottom: clamp(0.9rem, 1.6vw, 1.2rem);
 }
 
+/* hairline that draws in under the eyebrow */
+.pr__line {
+  display: block;
+  height: 1px;
+  width: clamp(48px, 7vw, 96px);
+  background: rgba(255, 255, 255, 0.34);
+  transform-origin: left center;
+  margin-bottom: clamp(1.4rem, 3vw, 2.2rem);
+  will-change: transform;
+}
+
+/* ---- headline: descender-safe word masks ---- */
 .pr__headline {
   font-family: var(--font-display);
-  font-weight: 500;
+  font-weight: 400;
   font-size: clamp(2.1rem, 4vw, 4.4rem);
-  line-height: 1.02;
-  letter-spacing: -0.02em;
+  /* ~1.1 leading + mask padding keeps "y / p / g" descenders un-clipped */
+  line-height: 1.1;
+  letter-spacing: -0.018em;
   margin: 0 0 clamp(1.6rem, 3vw, 2.6rem);
   color: #fff;
   display: flex;
   flex-wrap: wrap;
-  column-gap: 0.28em;
-  row-gap: 0.04em;
+  column-gap: 0.26em;
+  row-gap: 0;
 }
 
-/* clip mask per word */
+/* per-word line-mask: clips the rising word, NOT the descenders */
 .pr__wmask {
-  display: inline-flex;
+  display: inline-block;
   overflow: hidden;
-  padding-bottom: 0.04em;
+  vertical-align: top;
+  /* top breathing room + generous bottom room for descenders */
+  padding: 0.06em 0.02em 0.22em;
 }
 
 .pr__word {
   display: inline-block;
   will-change: transform;
+  /* reveal is translateY only — never clip-path */
+  transform: translateY(100%);
 }
 
 .pr__body {
@@ -548,7 +559,8 @@
   line-height: 1.7;
   color: rgba(255, 255, 255, 0.66);
   margin: 0 0 clamp(1.8rem, 3.4vw, 2.8rem);
-  max-width: 34ch;
+  max-width: 36ch;
+  will-change: transform, opacity;
 }
 
 .pr__more {
@@ -586,7 +598,7 @@
   background: rgba(255, 255, 255, 0.55);
 }
 
-/* ---- mobile: stack, no pin ---- */
+/* ---- mobile (<860px): stack, no pin, fade-up ---- */
 @media (max-width: 860px) {
   .pr__sticky {
     min-height: auto;
@@ -618,6 +630,7 @@
   }
 }
 
+/* ---- prefers-reduced-motion: snap to final state ---- */
 @media (prefers-reduced-motion: reduce) {
   .pr__img {
     transform: none !important;
@@ -628,5 +641,12 @@
   .pr__word {
     transform: none !important;
     clip-path: none !important;
+  }
+  .pr__line {
+    transform: scaleX(1) !important;
+  }
+  .pr__body {
+    transform: none !important;
+    opacity: 1 !important;
   }
 }

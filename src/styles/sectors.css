@@ -1,0 +1,226 @@
+/* ============================================================
+   SECTORS — pinned, scroll-scrubbed sector index + sticky preview
+   Monochrome. Photos are the only colour. Loaded LAST.
+   Namespaced under .sx so it does not collide with legacy rules.
+   ============================================================ */
+
+.sx {
+  background: var(--ink);
+  position: relative;
+  color: var(--paper);
+}
+
+/* the pinned stage — full viewport height while scrubbing */
+.sx__sticky {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+}
+
+.sx__inner {
+  width: 100%;
+  padding-block: clamp(4rem, 9vh, 7rem);
+}
+
+/* ---- header ---- */
+.sx__head {
+  margin-bottom: clamp(2rem, 5vw, 3.4rem);
+}
+.sx__title {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(2.2rem, 6vw, 5rem);
+  line-height: 1.0;
+  letter-spacing: -0.014em;
+  margin-top: 1rem;
+}
+
+/* ---- two-column body: list | sticky preview ---- */
+.sx__body {
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+  gap: clamp(2.5rem, 6vw, 6rem);
+  align-items: start;
+}
+
+/* ============ LIST ============ */
+.sx__list {
+  list-style: none;
+  border-top: 1px solid var(--hairline);
+  margin: 0;
+  padding: 0;
+}
+.sx__row {
+  border-bottom: 1px solid var(--hairline);
+}
+.sx__item {
+  display: flex;
+  align-items: center;
+  gap: clamp(1rem, 2vw, 1.6rem);
+  padding: clamp(0.7rem, 1.5vw, 1.05rem) 0;
+  cursor: pointer;
+  transform: translateX(0);
+  transition: transform 0.5s var(--ease-out);
+}
+.sx__idx {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  color: var(--paper-faint);
+  width: 2.2rem;
+  flex: none;
+  transition: color 0.45s var(--ease-out);
+}
+.sx__name {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(1.25rem, 3.1vw, 2.5rem);
+  line-height: 1.05;
+  letter-spacing: -0.015em;
+  flex: 1;
+  color: var(--paper-faint);
+  transition: color 0.45s var(--ease-out);
+}
+
+/* drawn SVG arrow — hidden until active */
+.sx__arrow {
+  flex: none;
+  color: var(--paper);
+  opacity: 0;
+  transform: translateX(-10px);
+  transition: opacity 0.45s var(--ease-out), transform 0.45s var(--ease-out);
+}
+.sx__arrow path { vector-effect: non-scaling-stroke; }
+
+/* active row — full white name, arrow in, slight slide */
+.sx__row.is-active .sx__item { transform: translateX(clamp(8px, 1vw, 16px)); }
+.sx__row.is-active .sx__name { color: var(--paper); }
+.sx__row.is-active .sx__idx { color: var(--paper-dim); }
+.sx__row.is-active .sx__arrow { opacity: 1; transform: translateX(0); }
+
+/* mobile inline image — hidden on desktop */
+.sx__mobshot { display: none; }
+
+/* ============ STICKY PREVIEW (desktop) ============ */
+.sx__previewcol {
+  align-self: stretch;
+}
+.sx__preview {
+  position: relative;
+  width: 100%;
+}
+.sx__frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  border-radius: 2px;
+  border: 1px solid var(--hairline);
+  background: #0b0b0b;
+}
+.sx__pimg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  /* inactive sectors sit desaturated — active photo blooms to full colour */
+  filter: grayscale(0.78) contrast(1.04) brightness(0.92);
+  transform: scale(1.05);
+  will-change: transform, opacity;
+  transition: filter 0.9s var(--ease-out);
+}
+.sx__pimg.is-on {
+  filter: grayscale(0) contrast(1.05) brightness(1);
+}
+.sx__veil {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(5,5,5,0) 55%, rgba(5,5,5,0.55) 100%);
+}
+
+/* caption under the frame */
+.sx__caption {
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+  margin-top: 1.1rem;
+}
+.sx__capidx {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  color: var(--paper-faint);
+  flex: none;
+}
+.sx__capname {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(1.05rem, 1.8vw, 1.45rem);
+  letter-spacing: -0.01em;
+  color: var(--paper);
+}
+
+/* thin scrub progress bar */
+.sx__progress {
+  margin-top: 0.9rem;
+  height: 1px;
+  width: 100%;
+  background: var(--hairline);
+  overflow: hidden;
+}
+.sx__progress span {
+  display: block;
+  height: 100%;
+  width: 100%;
+  background: var(--paper);
+  transform-origin: left center;
+  transform: scaleX(0.083);
+  transition: transform 0.6s var(--ease-out);
+}
+
+/* ============ MOBILE (<860px): no pin, vertical list w/ image below ============ */
+@media (max-width: 859px) {
+  .sx__sticky {
+    min-height: 0;
+    display: block;
+    overflow: visible;
+  }
+  .sx__body {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+  /* hide the sticky desktop preview entirely */
+  .sx__previewcol { display: none; }
+
+  .sx__row {
+    padding-bottom: 0.4rem;
+  }
+  .sx__item {
+    transform: none !important;
+  }
+  /* every row shows its own photo, full colour, fade-up handled by GSAP */
+  .sx__name { color: var(--paper); }
+  .sx__arrow { opacity: 0.55; transform: none; }
+
+  .sx__mobshot {
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 11;
+    margin: 0.2rem 0 1.4rem;
+    background-size: cover;
+    background-position: center;
+    border-radius: 2px;
+    border: 1px solid var(--hairline);
+    filter: contrast(1.04);
+  }
+}
+
+/* ============ REDUCED MOTION ============ */
+@media (prefers-reduced-motion: reduce) {
+  .sx__item, .sx__pimg, .sx__arrow, .sx__name, .sx__idx, .sx__progress span {
+    transition: none !important;
+  }
+  .sx__pimg { transform: none !important; }
+}

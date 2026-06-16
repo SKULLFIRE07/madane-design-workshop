@@ -48,9 +48,11 @@ h1, h2, h3, h4 { font-weight: 400; }
 
 /* ---- remove idle / infinite animations (one-shot motion only) ---- */
 .hero__aurora { display: none !important; }
-/* one slow, premium photo drift (replaces the fast 4s montage churn) */
-.hero__frame { filter: grayscale(0.35) contrast(1.05) brightness(0.9) !important; transition: opacity 2.2s var(--ease-out) !important; }
-.hero__frame.is-active { opacity: 0.5 !important; animation: heroDrift 26s ease-out forwards !important; }
+/* WILD but BLACKISH backdrop: a dark moody terrain, faint photo atmosphere */
+.three-field { opacity: 0.7 !important; z-index: 2 !important; }
+.hero__frame { filter: grayscale(0.7) contrast(1.05) brightness(0.5) !important; transition: opacity 2.2s var(--ease-out) !important; }
+.hero__frame.is-active { opacity: 0.18 !important; animation: heroDrift 28s ease-out forwards !important; }
+.hero { background: #050505; }
 @keyframes heroDrift { from { transform: scale(1.04); } to { transform: scale(1.12); } }
 .hero__veil {
   background:
@@ -59,6 +61,9 @@ h1, h2, h3, h4 { font-weight: 400; }
     linear-gradient(180deg, rgba(5,5,5,0.4) 0%, transparent 30%, rgba(5,5,5,0.95) 100%) !important;
 }
 .hero__cue i { animation: none !important; opacity: 0.5; }
+/* legibility scrim behind the headline (field stays wild elsewhere) */
+.hero__content { position: relative; }
+.hero__content::before { content: ''; position: absolute; inset: -20% -30% -20% -40%; z-index: -1; pointer-events: none; background: radial-gradient(58% 56% at 32% 46%, rgba(5,5,5,0.78), rgba(5,5,5,0.32) 60%, transparent 78%); }
 .indiamap__glow { display: none !important; }
 .why__grid-bg { animation: none !important; opacity: 0.25; }
 .clients__row { animation-duration: 80s; } /* much slower, calmer */
@@ -101,9 +106,11 @@ h1, h2, h3, h4 { font-weight: 400; }
 .stat__val { font-family: var(--font-display) !important; font-weight: 400 !important; font-size: clamp(1.9rem, 3.6vw, 3.2rem) !important; color: #fff; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; line-height: 1; }
 .stat__label { font-family: var(--font-sans) !important; font-size: 0.72rem; letter-spacing: 0.02em; color: var(--paper-faint); margin-top: 0.7rem; line-height: 1.4; text-transform: none; }
 
-/* ============ PHILOSOPHY — clean inline word-mask (fixes overlap glitch) ============ */
-.pr__headline { line-height: 1.12 !important; display: flex; flex-wrap: wrap; column-gap: 0.28em; row-gap: 0.04em; }
-.pr__wmask { display: inline-block; overflow: hidden; padding: 0.1em 0.02em 0.18em; vertical-align: top; }
+/* ============ PHILOSOPHY — descender-safe word line-masks (fixes overlap/clip) ============
+   line-height ~1.1 + generous bottom padding so Fraunces descenders never clip;
+   reveal is translateY only (no clip-path). Loaded last so it wins the cascade. */
+.pr__headline { line-height: 1.1 !important; display: flex; flex-wrap: wrap; column-gap: 0.26em; row-gap: 0; }
+.pr__wmask { display: inline-block; overflow: hidden; padding: 0.06em 0.02em 0.22em; vertical-align: top; }
 .pr__word { display: inline-block; will-change: transform; }
 
 /* ---- focus ---- */

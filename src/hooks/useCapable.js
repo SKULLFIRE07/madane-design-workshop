@@ -20,7 +20,8 @@ export function detectCapable() {
     const hasWebGL = !!gl
     if (gl && gl.getExtension) gl.getExtension('WEBGL_lose_context')?.loseContext?.()
 
-    cached = hasWebGL && !reduce && !coarse && !smallScreen && cores >= 6 && (mem === undefined || mem >= 4)
+    // relaxed: show the field on any WebGL desktop that isn't reduced-motion / tiny / very low-core
+    cached = hasWebGL && !reduce && !coarse && !smallScreen && cores >= 4 && (mem === undefined || mem >= 4)
   } catch {
     cached = false
   }

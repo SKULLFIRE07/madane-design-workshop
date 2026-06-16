@@ -22,14 +22,18 @@ const vertex = /* glsl */ `
   }
   void main(){
     vec3 pos = position;
-    float t = uTime * 0.18;
-    float n = noise(pos.xy * 0.4 + t) * 1.3;
-    float d = distance(pos.xy, uPointer * 5.0);
-    n += sin(d * 1.1 - uTime * 1.3) * exp(-d * 0.45) * 0.7;
+    float t = uTime * 0.22;
+    // layered flowing terrain — taller, more dramatic
+    float n = noise(pos.xy * 0.30 + t) * 2.1;
+    n += noise(pos.xy * 0.85 - t * 0.6) * 0.9;
+    n += sin(pos.x * 0.5 + uTime * 0.6) * 0.35;
+    // mouse ripple — wider + stronger
+    float d = distance(pos.xy, uPointer * 6.5);
+    n += sin(d * 1.0 - uTime * 1.8) * exp(-d * 0.30) * 1.3;
     pos.z += n;
     vE = n;
     vec4 mv = modelViewMatrix * vec4(pos, 1.0);
-    gl_PointSize = 2.2 * (300.0 / -mv.z);
+    gl_PointSize = (2.6 + n * 0.7) * (320.0 / -mv.z);
     gl_Position = projectionMatrix * mv;
   }
 `
@@ -38,9 +42,9 @@ const fragment = /* glsl */ `
   varying float vE;
   uniform vec3 uLow; uniform vec3 uHigh;
   void main(){
-    float c = smoothstep(-0.8, 1.8, vE);
+    float c = smoothstep(-1.2, 2.6, vE);
     float d = length(gl_PointCoord - 0.5);
-    float a = smoothstep(0.5, 0.2, d) * (0.18 + c * 0.5);
+    float a = smoothstep(0.5, 0.12, d) * (0.10 + c * 0.42);
     gl_FragColor = vec4(mix(uLow, uHigh, c), a);
   }
 `
@@ -48,15 +52,15 @@ const fragment = /* glsl */ `
 function Grid({ pausedRef }) {
   const { invalidate } = useThree()
   const ptr = useRef(new THREE.Vector2(0, 0))
-  const geometry = useMemo(() => new THREE.PlaneGeometry(22, 13, 72, 42), [])
+  const geometry = useMemo(() => new THREE.PlaneGeometry(28, 16, 96, 56), [])
   useEffect(() => () => geometry.dispose(), [geometry])
 
   const uniforms = useMemo(
     () => ({
       uTime: { value: 0 },
       uPointer: { value: new THREE.Vector2(0, 0) },
-      uLow: { value: new THREE.Color('#1a1a1a') },
-      uHigh: { value: new THREE.Color('#cfcfcf') },
+      uLow: { value: new THREE.Color('#070707') },
+      uHigh: { value: new THREE.Color('#454545') },
     }),
     []
   )
