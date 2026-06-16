@@ -1,4 +1,9 @@
 /* ===== PREMIUM COMPONENTS (agent-built, integrated) ===== */
+/* ============================================================
+   LogoReveal · cinematic monochrome logo-led title sequence.
+   No loading numbers. The brush mark is the hero of the moment.
+   CSS + GSAP transforms/opacity only — 60fps, strictly black/white/grey.
+   ============================================================ */
 .lr {
   position: fixed;
   inset: 0;
@@ -26,6 +31,53 @@
   mix-blend-mode: screen;
 }
 
+/* ---- faint masked blueprint atmosphere ----------------------------- */
+.lr__bg {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  /* radial mask so the field fades to pure black at the edges */
+  -webkit-mask-image: radial-gradient(120% 120% at 50% 50%, #000 0%, #000 38%, transparent 78%);
+  mask-image: radial-gradient(120% 120% at 50% 50%, #000 0%, #000 38%, transparent 78%);
+}
+
+/* drifting blueprint grid */
+.lr__grid {
+  position: absolute;
+  inset: -25%;
+  opacity: 0.5;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.045) 1px, transparent 1px);
+  background-size: 56px 56px;
+  animation: lrGridDrift 22s linear infinite;
+  will-change: transform;
+}
+
+@keyframes lrGridDrift {
+  from { transform: translate3d(0, 0, 0); }
+  to   { transform: translate3d(-56px, -56px, 0); }
+}
+
+/* concentric rings behind the mark */
+.lr__rings {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+}
+
+.lr__ring {
+  position: absolute;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 50%;
+  will-change: transform, opacity;
+}
+
+.lr__ring:nth-child(1) { width: 34vmin; height: 34vmin; }
+.lr__ring:nth-child(2) { width: 58vmin; height: 58vmin; border-color: rgba(255, 255, 255, 0.055); }
+.lr__ring:nth-child(3) { width: 86vmin; height: 86vmin; border-color: rgba(255, 255, 255, 0.035); }
+
 .lr__stage {
   position: absolute;
   inset: 0;
@@ -33,7 +85,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: clamp(22px, 4vh, 46px);
+  gap: clamp(20px, 3.4vh, 40px);
 }
 
 /* ---- the mark ------------------------------------------------------ */
@@ -41,7 +93,7 @@
   position: relative;
   width: clamp(240px, 34vw, 460px);
   aspect-ratio: 16 / 11;
-  will-change: transform, opacity;
+  will-change: transform, opacity, filter;
   transform: translateZ(0);
 }
 
@@ -61,7 +113,22 @@
   pointer-events: none;
 }
 
-/* white shutter that sweeps across the mark */
+/* ignition scan-line that "prints" the mark */
+.lr__scan {
+  position: absolute;
+  top: 50%;
+  left: -3%;
+  width: 106%;
+  height: 1px;
+  margin-top: -0.5px;
+  background: #fff;
+  box-shadow: 0 0 14px 1px rgba(255, 255, 255, 0.65);
+  transform: scaleX(0);
+  will-change: transform, opacity;
+  pointer-events: none;
+}
+
+/* hard ink-stamp shutter that punches across the mark */
 .lr__shutter {
   position: absolute;
   top: -6%;
@@ -75,6 +142,31 @@
   pointer-events: none;
 }
 
+/* ---- kinetic wordmark ---------------------------------------------- */
+.lr__word {
+  font-family: var(--font-display);
+  font-weight: 400;
+  /* cap the optical size: at opsz ~144 (auto, for huge type) Fraunces' contrast
+     thins the 'e' crossbar to nothing and it reads as 'c'. opsz 60 keeps an
+     elegant high-contrast display look while preserving the crossbar. */
+  font-optical-sizing: auto;
+  font-variation-settings: 'opsz' 60;
+  font-size: clamp(46px, 8.5vw, 132px);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: #f4f4f4;
+  /* overflow:hidden masks the char rise (chars travel ~1em from below); the
+     generous horizontal padding keeps the negative tracking from clipping the
+     last glyph's right terminal (was cropping the 'e' into a 'c'). */
+  overflow: hidden;
+  padding: 0.14em 0.34em;
+}
+
+.lr__word .char {
+  display: inline-block;
+  will-change: transform;
+}
+
 /* ---- disciplines line --------------------------------------------- */
 .lr__tag {
   overflow: hidden;
@@ -82,7 +174,7 @@
   font-size: clamp(10px, 1.05vw, 13px);
   letter-spacing: 0.42em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.62);
+  color: rgba(255, 255, 255, 0.5);
   padding-left: 0.42em;
 }
 
@@ -91,54 +183,49 @@
   will-change: transform;
 }
 
-/* ---- corner counter (master clock) -------------------------------- */
-.lr__count {
+/* ---- the only progress hint: an ultra-thin hairline (no digits) ---- */
+.lr__bar {
   position: absolute;
-  right: clamp(20px, 4vw, 56px);
-  bottom: clamp(20px, 4vw, 48px);
-  display: flex;
-  align-items: baseline;
-  gap: 0.4em;
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
-  font-feature-settings: 'tnum' 1;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
 }
 
-.lr__count span {
-  font-size: clamp(40px, 7vw, 96px);
-  line-height: 0.9;
-  font-weight: 500;
-  color: #fff;
-  letter-spacing: -0.02em;
+.lr__bar-fill {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: #f4f4f4;
+  transform: scaleX(0);
+  transform-origin: left center;
+  will-change: transform;
 }
 
-.lr__count i {
-  font-style: normal;
-  font-size: clamp(11px, 1.1vw, 14px);
-  letter-spacing: 0.2em;
-  color: rgba(255, 255, 255, 0.4);
-  transform: translateY(-0.2em);
-}
-
-/* ---- corner stamp -------------------------------------------------- */
+/* ---- corner brand stamp (est.2008) -------------------------------- */
 .lr__corner {
   position: absolute;
   left: clamp(20px, 4vw, 56px);
-  bottom: clamp(22px, 4vw, 52px);
+  bottom: clamp(24px, 4vw, 54px);
   font-family: var(--font-mono);
   font-size: clamp(9px, 0.85vw, 11px);
   letter-spacing: 0.34em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.34);
+  color: rgba(255, 255, 255, 0.4);
+  will-change: transform, opacity;
 }
 
 /* ---- mobile degrade ----------------------------------------------- */
 @media (max-width: 860px) {
   .lr__mark { width: clamp(200px, 64vw, 320px); }
-  .lr__count span { font-size: clamp(36px, 13vw, 64px); }
-  .lr__corner { font-size: 9px; letter-spacing: 0.26em; }
+  .lr__word { font-size: clamp(44px, 16vw, 84px); }
+  .lr__corner { font-size: 9px; letter-spacing: 0.26em; bottom: 26px; }
   .lr__tag { letter-spacing: 0.3em; }
-  .lr__grain { display: none; } /* lighten paint on mobile */
+  .lr__grain { display: none; }       /* lighten paint on mobile */
+  .lr__grid { animation: none; }       /* no idle repaint on mobile */
+  .lr__ring:nth-child(3) { display: none; }
 }
 
 /* ---- reduced motion: static, no overlay artefacts ----------------- */

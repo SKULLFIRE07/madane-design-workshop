@@ -1,0 +1,223 @@
+/* ============================================================
+   GROWTH · scroll-drawn momentum charts. Loaded LAST so it
+   overrides the legacy .gchart / .gc-* rules. Monochrome only.
+   Combined bar + drawn-line + area composition, GSAP-scrubbed.
+   ============================================================ */
+
+/* ---- layout: charts stack, comfortable rhythm ---- */
+.growth__charts {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(2.6rem, 5vw, 4.2rem);
+  margin-top: clamp(1.2rem, 3vw, 2.4rem);
+}
+
+.gchart { display: block; }
+
+/* ---- header row: metric label + avg-growth figure ---- */
+.gchart__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding-bottom: 1.1rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--hairline);
+}
+.gchart__metric {
+  font-family: var(--font-mono);
+  font-size: clamp(0.68rem, 1vw, 0.8rem);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--paper-dim);
+}
+.gchart__growth {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  white-space: nowrap;
+}
+.gchart__growth em {
+  font-family: var(--font-mono);
+  font-style: normal;
+  font-size: 0.66rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--paper-faint);
+}
+.gchart__growth strong {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(1.7rem, 3vw, 2.7rem);
+  color: #fff;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  /* legacy gave this a gradient-text; flatten to solid white */
+  background: none;
+  -webkit-text-fill-color: #fff;
+}
+
+/* ---- plot frame ---- */
+.gchart__plot {
+  position: relative;
+  height: clamp(220px, 27vw, 360px);
+  margin-bottom: 2.4rem;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.035), rgba(255,255,255,0.008));
+  border: 1px solid var(--hairline);
+  border-radius: 2px;
+  overflow: visible;
+}
+.gchart__svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+/* ---- grid + baseline axis ---- */
+.gc-grid {
+  stroke: var(--hairline-soft);
+  stroke-width: 0.3;
+  vector-effect: non-scaling-stroke;
+}
+.gc-axis {
+  stroke: rgba(255,255,255,0.28);
+  stroke-width: 0.5;
+  vector-effect: non-scaling-stroke;
+}
+
+/* ---- rising bars (white; covid bar greyed via fill in JSX) ---- */
+.gc-bar {
+  will-change: transform;
+}
+.gc-barwrap.is-covid .gc-bar {
+  /* extra dim so the dip reads as a muted year */
+  opacity: 0.9;
+}
+
+/* ---- drawn trend line + area ---- */
+.gc-line {
+  /* re-introduce the subtle white glow mature.css strips with !important */
+  filter: drop-shadow(0 0 3px rgba(255,255,255,0.45)) !important;
+}
+.gc-area { mix-blend-mode: screen; }
+
+/* ---- node dots ---- */
+.gc-dot {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  margin: -4px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 9px rgba(255,255,255,0.85) !important;
+  opacity: 0;
+  z-index: 2;
+}
+.gc-dot.is-covid {
+  background: #9a9a9a;
+  box-shadow: 0 0 9px rgba(170,170,170,0.7) !important;
+}
+.gc-dot.is-last {
+  width: 11px;
+  height: 11px;
+  margin: -5.5px;
+  box-shadow: 0 0 14px rgba(255,255,255,1) !important;
+}
+
+/* ---- value tags ---- */
+.gc-tag {
+  position: absolute;
+  /* centring + lift are owned by GSAP (xPercent/yPercent) so its y/scale
+     tween doesn't clobber a CSS translate(); see Growth.jsx */
+  opacity: 0;
+  white-space: nowrap;
+  font-family: var(--font-mono);
+  font-size: clamp(0.56rem, 0.95vw, 0.76rem);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: #fff;
+  background: rgba(8,8,8,0.92);
+  border: 1px solid var(--hairline);
+  padding: 0.16rem 0.46rem;
+  border-radius: 3px;
+  z-index: 3;
+  pointer-events: none;
+}
+.gc-tag.is-last {
+  color: #fff;
+  border-color: rgba(255,255,255,0.55);
+  background: rgba(14,14,14,0.96);
+  font-weight: 600;
+}
+.gc-tag.is-covid {
+  color: #bcbcbc;
+  border-color: rgba(170,170,170,0.34);
+}
+
+/* ---- x-axis year labels ---- */
+.gc-xlabel {
+  position: absolute;
+  bottom: 3.5%;
+  /* horizontal centring owned by GSAP (xPercent) — GSAP animates y here */
+  font-family: var(--font-mono);
+  font-size: clamp(0.5rem, 0.9vw, 0.7rem);
+  letter-spacing: 0.04em;
+  color: var(--paper-faint);
+  opacity: 0;
+  white-space: nowrap;
+}
+.gc-xlabel.is-covid { color: #8f8f8f; }
+
+/* ---- covid marker pill ---- */
+.gc-covid {
+  position: absolute;
+  bottom: -1.9rem;
+  /* horizontal centring owned by GSAP (xPercent) for transform consistency */
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #b4b4b4;
+  padding: 0.2rem 0.7rem;
+  border: 1px solid rgba(170,170,170,0.32);
+  border-radius: 100px;
+  white-space: nowrap;
+  opacity: 0;
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 760px) {
+  .gchart__top { gap: 0.6rem 1rem; }
+  .gchart__plot { height: clamp(200px, 52vw, 280px); }
+  .gc-tag { font-size: 0.52rem; padding: 0.12rem 0.36rem; }
+}
+
+@media (max-width: 560px) {
+  /* keep the axis legible: years go tiny, value tags collapse to the
+     key nodes (latest + covid) so they don't overlap on a narrow plot. */
+  .gc-xlabel { font-size: 0.44rem; letter-spacing: 0; }
+  .gc-tag { display: none; }
+  .gc-tag.is-last,
+  .gc-tag.is-covid { display: block; }
+  .gc-dot { width: 6px; height: 6px; margin: -3px; }
+  .gc-dot.is-last { width: 9px; height: 9px; margin: -4.5px; }
+  .gc-covid { font-size: 0.54rem; bottom: -1.7rem; }
+}
+
+/* ============================================================
+   REDUCED MOTION · everything renders in its final drawn state
+   (JS already sets it, but guarantee no half-drawn flash).
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  .gc-bar { transform: none !important; }
+  .gc-area, .gc-axis, .gc-grid,
+  .gc-dot, .gc-tag, .gc-xlabel, .gc-covid { opacity: 1 !important; }
+  .gc-line { stroke-dashoffset: 0 !important; }
+  .gc-dot { transform: none !important; }
+}

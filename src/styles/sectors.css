@@ -10,30 +10,45 @@
   color: var(--paper);
 }
 
-/* the pinned stage — full viewport height while scrubbing */
+/* the pinned stage — full viewport height while scrubbing.
+   100svh (small-viewport) keeps the stage honest on laptops with dynamic
+   browser chrome; the legacy 100vh stays as a fallback. */
 .sx__sticky {
   min-height: 100vh;
+  min-height: 100svh;
   display: flex;
   align-items: center;
   overflow: hidden;
 }
 
+/* The whole pinned composition (header + body) must live inside one viewport.
+   We bound the inner block height and let the preview frame absorb the slack,
+   so nothing in the right column can ever fall under the overflow:hidden edge. */
 .sx__inner {
   width: 100%;
-  padding-block: clamp(4rem, 9vh, 7rem);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  /* tighter, viewport-relative padding so short laptops still fit.
+     Upper bound kept modest so tall screens don't inflate the budget. */
+  padding-block: clamp(2.2rem, 4.5vh, 3.5rem);
+  /* reserve nothing beyond the stage; body is sized against this budget */
+  max-height: 100svh;
 }
 
 /* ---- header ---- */
 .sx__head {
-  margin-bottom: clamp(2rem, 5vw, 3.4rem);
+  margin-bottom: clamp(1.4rem, 3vh, 2.2rem);
+  flex: none;
 }
 .sx__title {
   font-family: var(--font-display);
   font-weight: 400;
-  font-size: clamp(2.2rem, 6vw, 5rem);
+  /* cap the top end a touch so two lines never dominate a short stage */
+  font-size: clamp(2.1rem, 5.2vw, 4.4rem);
   line-height: 1.0;
   letter-spacing: -0.014em;
-  margin-top: 1rem;
+  margin-top: clamp(0.6rem, 1.4vh, 1rem);
 }
 
 /* ---- two-column body: list | sticky preview ---- */
@@ -41,7 +56,9 @@
   display: grid;
   grid-template-columns: 1.05fr 0.95fr;
   gap: clamp(2.5rem, 6vw, 6rem);
-  align-items: start;
+  align-items: center;
+  flex: 1 1 auto;
+  min-height: 0; /* allow the grid to shrink within the flex column */
 }
 
 /* ============ LIST ============ */
@@ -58,7 +75,9 @@
   display: flex;
   align-items: center;
   gap: clamp(1rem, 2vw, 1.6rem);
-  padding: clamp(0.7rem, 1.5vw, 1.05rem) 0;
+  /* height-aware vertical padding: 12 rows must fit the pinned stage even on
+     short laptops, so the row rhythm shrinks with viewport height. */
+  padding: clamp(0.35rem, 0.8vh, 0.95rem) 0;
   cursor: pointer;
   transform: translateX(0);
   transition: transform 0.5s var(--ease-out);
@@ -82,6 +101,15 @@
   color: var(--paper-faint);
   transition: color 0.45s var(--ease-out);
 }
+/* On the pinned desktop stage the 12 names must all fit one viewport, so the
+   type also yields to short heights via a vh-bounded cap. Mobile keeps the
+   base size above (no pin there). */
+@media (min-width: 860px) {
+  .sx__name {
+    font-size: clamp(1.15rem, min(3.1vw, 3.3vh), 2.4rem);
+    line-height: 1.04;
+  }
+}
 
 /* drawn SVG arrow — hidden until active */
 .sx__arrow {
@@ -104,20 +132,54 @@
 
 /* ============ STICKY PREVIEW (desktop) ============ */
 .sx__previewcol {
-  align-self: stretch;
+  align-self: center;
+  min-height: 0;
 }
 .sx__preview {
+  /* shared height budget: frame height is the viewport minus the reserve kept
+     for header + paddings + caption + progress. Exposed here so the caption and
+     progress bar can match the (possibly height-capped, narrower) frame width
+     and stay perfectly aligned under it. */
+  --sx-reserve: 22rem;
+  --sx-h: clamp(14rem, calc(100svh - var(--sx-reserve)), 34rem);
+  --sx-fw: min(100%, calc(var(--sx-h) * 0.8)); /* effective frame width */
   position: relative;
   width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* centre frame + its caption/progress as one block */
 }
+
+/* HEIGHT-FIRST FRAME — the bug fix.
+   The old aspect-ratio:4/5 forced an over-tall frame whose width drove its
+   height, pushing the caption + progress under the pinned stage's
+   overflow:hidden edge. Now the frame is HEIGHT-driven from a viewport budget
+   (--sx-h on .sx__preview = 100svh minus header/paddings/caption/progress
+   reserve) and its width follows the 4:5 ratio (--sx-fw), clamped to the
+   column. The whole right preview is therefore guaranteed to fit one viewport
+   down to ~700px stage height, photo proportions intact. */
 .sx__frame {
   position: relative;
-  width: 100%;
-  aspect-ratio: 4 / 5;
+  /* HEIGHT-DRIVEN: cap by the viewport budget (--sx-h, defined on .sx__preview);
+     never below a sane floor. Width follows the 4:5 ratio but is clamped to the
+     column width so a short, wide viewport can't blow the frame past its column. */
+  height: var(--sx-h);
+  width: var(--sx-fw);
+  flex: none;
   overflow: hidden;
   border-radius: 2px;
   border: 1px solid var(--hairline);
   background: #0b0b0b;
+}
+/* faint inner ring — adds quiet premium depth, pure monochrome */
+.sx__frame::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 1px var(--hairline-soft);
 }
 .sx__pimg {
   position: absolute;
@@ -140,12 +202,13 @@
   background: linear-gradient(180deg, rgba(5,5,5,0) 55%, rgba(5,5,5,0.55) 100%);
 }
 
-/* caption under the frame */
+/* caption under the frame — matched to the (possibly capped) frame width */
 .sx__caption {
+  width: var(--sx-fw);
   display: flex;
   align-items: baseline;
   gap: 1rem;
-  margin-top: 1.1rem;
+  margin-top: clamp(0.7rem, 1.6vh, 1.1rem);
 }
 .sx__capidx {
   font-family: var(--font-mono);
@@ -162,11 +225,11 @@
   color: var(--paper);
 }
 
-/* thin scrub progress bar */
+/* thin scrub progress bar — matched to the (possibly capped) frame width */
 .sx__progress {
-  margin-top: 0.9rem;
+  margin-top: clamp(0.6rem, 1.2vh, 0.9rem);
   height: 1px;
-  width: 100%;
+  width: var(--sx-fw);
   background: var(--hairline);
   overflow: hidden;
 }
@@ -190,6 +253,12 @@
   .sx__body {
     grid-template-columns: 1fr;
     gap: 0;
+  }
+  /* no pinned-height budget on mobile — let the list flow naturally */
+  .sx__inner {
+    display: block;
+    max-height: none;
+    padding-block: clamp(3rem, 9vh, 5rem);
   }
   /* hide the sticky desktop preview entirely */
   .sx__previewcol { display: none; }

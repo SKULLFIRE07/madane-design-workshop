@@ -25,6 +25,8 @@ import './styles/refine.css'
 import './styles/premium.css'
 import './styles/mature.css'
 import './styles/sectors.css'
+import './styles/pipeline.css'
+import './styles/charts.css'
 
 export default function App() {
   const [loaded, setLoaded] = useState(false)
