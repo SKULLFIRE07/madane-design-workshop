@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import Lenis from 'lenis'
+import Snap from 'lenis/snap'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
@@ -34,7 +35,29 @@ export function useSmoothScroll() {
     // expose for anchor scrolling
     window.__lenis = lenis
 
+    // ── SOFT STOP at every section boundary ────────────────────────────────
+    // Proximity snap: when scrolling comes to rest NEAR a section top, it gently
+    // settles onto it. It only engages within a small distance window and after
+    // a debounce, so it never traps scroll mid-section — important because four
+    // sections are pinned/scrubbed (Capabilities, Edge, Sectors, ProjectsGallery)
+    // and must stay freely scrollable through their long pins.
+    const snap = new Snap(lenis, {
+      type: 'proximity',
+      duration: 0.9,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      distanceThreshold: '28%',
+      debounce: 450,
+    })
+    const sections = Array.from(document.querySelectorAll('main > section, main > footer'))
+    if (sections.length) snap.addElements(sections, { align: ['start'] })
+
+    // keep snap targets correct after pins/fonts/resize shift the layout
+    const onRefresh = () => snap.resize()
+    ScrollTrigger.addEventListener('refresh', onRefresh)
+
     return () => {
+      ScrollTrigger.removeEventListener('refresh', onRefresh)
+      snap.destroy()
       gsap.ticker.remove(raf)
       lenis.destroy()
       window.__lenis = null

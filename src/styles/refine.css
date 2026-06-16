@@ -72,11 +72,11 @@ body { background: #040404; }
 @media (max-width: 600px) { .showcase__dots span { width: 16px; } }
 
 /* ============ CONTACT FORM ============ */
-.contact__form { display: flex; flex-direction: column; gap: 1.8rem; margin-top: 2.4rem; max-width: 460px; }
+.contact__form { display: flex; flex-direction: column; gap: 1.6rem; margin-top: 1.9rem; max-width: 460px; }
 .field { position: relative; }
 .field input, .field textarea {
   width: 100%; background: transparent; border: none; border-bottom: 1px solid var(--hairline);
-  padding: 0.9rem 0 0.6rem; color: #fff; font-family: var(--font-sans); font-size: 1rem; resize: none;
+  padding: 0.85rem 0 0.6rem; color: #fff; font-family: var(--font-sans); font-size: 1rem; resize: none;
   transition: border-color 0.3s;
 }
 .field textarea { line-height: 1.5; }
@@ -262,10 +262,16 @@ body { background: #040404; }
 .sectors__item.is-hot .sectors__name { transform: translateX(6px); }
 
 /* ============ CONTACT CLOSING · two clean lines, no mid-word break ============ */
-.contact__closing { flex-direction: column; align-items: center; flex-wrap: nowrap; gap: 0; line-height: 0.9; }
-.cl-line { display: flex; gap: 0.3em; white-space: nowrap; justify-content: center; }
+/* right-aligned, filling the open space at the foot of the details column */
+.contact__closing { flex-direction: column; align-items: flex-end; flex-wrap: nowrap; gap: 0; line-height: 0.9; }
+.cl-line { display: flex; gap: 0.3em; white-space: nowrap; justify-content: flex-end; }
 .cl-word { display: inline-flex; }
 .cl { display: inline-block; }
+/* single-column (mobile / narrow): read naturally from the left */
+@media (max-width: 900px) {
+  .contact__closing { margin-top: clamp(1.5rem, 6vw, 3rem); align-items: flex-start; text-align: left; transform-origin: bottom left; }
+  .cl-line { justify-content: flex-start; }
+}
 
 /* ============ SECTORS · fixed preview on the right ============ */
 .sectors__body { display: grid; grid-template-columns: 1.15fr 0.85fr; gap: clamp(2rem, 5vw, 5rem); align-items: start; }
@@ -293,7 +299,7 @@ body { background: #040404; }
   .showcase__name { font-size: clamp(2.4rem, 14vw, 5rem); }
   .mf__copy { font-size: clamp(1.5rem, 7vw, 2.4rem); max-width: none; }
   .section { padding-block: clamp(4rem, 10vh, 6rem); }
-  .contact__closing { font-size: clamp(1.6rem, 13vw, 4rem); }
+  .contact__closing { font-size: clamp(1.4rem, 7vw, 2.6rem); }
   .stats__grid { grid-template-columns: repeat(2, 1fr); }
   .edge__word { font-size: clamp(8rem, 40vw, 16rem); }
 }

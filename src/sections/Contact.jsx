@@ -11,7 +11,6 @@ gsap.registerPlugin(ScrollTrigger)
 
 export function Contact() {
   const root = useRef(null)
-  const closing = useRef(null)
   const [form, setForm] = useState({ name: '', email: '', message: '' })
 
   const submit = (e) => {
@@ -22,23 +21,10 @@ export function Contact() {
 
   useLayoutEffect(() => {
     const ctx = gsap.context(() => {
-      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
       gsap.from('.contact__line', { y: 26, opacity: 0, stagger: 0.07, duration: 0.9, ease: 'expo.out', scrollTrigger: { trigger: '.contact__details', start: 'top 85%', once: true } })
-
-      ScrollTrigger.create({
-        trigger: closing.current,
-        start: 'top 82%',
-        once: true,
-        onEnter: () => {
-          const lines = closing.current.querySelectorAll('.cl-line')
-          gsap.fromTo(lines, { yPercent: 100, opacity: 0 }, { yPercent: 0, opacity: 1, stagger: 0.12, duration: 0.9, ease: 'power3.out' })
-        },
-      })
     }, root)
     return () => ctx.revert()
   }, [])
-
-  const lines = [['think', 'to'], ['innovate']]
 
   return (
     <footer id="contact" className="contact section grain" ref={root}>
@@ -61,7 +47,7 @@ export function Contact() {
                 <label htmlFor="cf-email">email</label>
               </div>
               <div className="field">
-                <textarea id="cf-msg" rows={3} value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} placeholder=" " />
+                <textarea id="cf-msg" rows={2} value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} placeholder=" " />
                 <label htmlFor="cf-msg">about your project</label>
               </div>
               <MagneticButton as="button" type="submit" className="contact__cta" data-cursor="send" strength={0.3}>
@@ -72,7 +58,6 @@ export function Contact() {
 
           <div className="contact__details">
             <div className="contact__badge"><BrandMark size={64} /></div>
-            <p className="contact__rally">{brand.rally}</p>
             <div className="contact__line contact__primary">
               <a href={`mailto:${contact.email}`} data-cursor="email">{contact.email}</a>
               <a href={`tel:${contact.phone.replace(/\s/g, '')}`} data-cursor="call">{contact.phone}</a>
@@ -82,25 +67,7 @@ export function Contact() {
               <span>{contact.address}</span>
               <span className="contact__cities">{contact.cities}</span>
             </div>
-            <div className="contact__line contact__links">
-              <a href="https://www.madane.in" target="_blank" rel="noreferrer" data-cursor="visit">{contact.website}</a>
-              <span>{contact.social}</span>
-            </div>
           </div>
-        </div>
-
-        <div className="contact__closing" ref={closing} aria-label={brand.rally}>
-          {lines.map((words, li) => (
-            <span className="cl-line" key={li}>
-              {words.map((w, wi) => (
-                <span className="cl-word" key={wi}>
-                  {w.split('').map((c, ci) => (
-                    <span key={ci} className="cl" aria-hidden>{c}</span>
-                  ))}
-                </span>
-              ))}
-            </span>
-          ))}
         </div>
 
         <div className="contact__copyline">

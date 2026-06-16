@@ -111,13 +111,9 @@
   vector-effect: non-scaling-stroke;
 }
 
-/* ---- the drawn trend line + soft area ---- */
-.gc-line {
-  /* subtle STATIC white glow — never animated on the scrub. Keeps the
-     stroke-dashoffset draw cheap (no per-frame filter re-raster cost). */
-  filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.30)) !important;
-}
-.gc-area { mix-blend-mode: screen; }
+/* ---- the drawn trend line + soft area (clean, no glow) ---- */
+.gc-line { filter: none; }
+.gc-area { mix-blend-mode: normal; }
 
 /* ---- node dots (intermediate small, covid grey, last is the hero) ---- */
 .gc-dot {

@@ -84,6 +84,9 @@ export function Hero({ started = false }) {
         <div className="hero__veil" />
       </div>
 
+      {/* faint logo watermark in the lower empty space, behind the content */}
+      <div className="hero__watermark" aria-hidden />
+
       <div className="hero__strap" aria-hidden>
         architecture &nbsp;|&nbsp; interiors &nbsp;|&nbsp; turnkey
       </div>

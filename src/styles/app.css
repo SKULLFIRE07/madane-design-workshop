@@ -44,10 +44,23 @@
 
 /* ---------- nav ---------- */
 .nav {
-  position: fixed; top: 0; left: 0; right: 0; z-index: 800;
+  /* floating frosted-glass pill: inset from the top/sides, centred, capped
+     width, fully rounded, with a hairline edge + soft drop shadow. */
+  position: fixed;
+  top: clamp(0.7rem, 1.6vw, 1.4rem);
+  left: 0; right: 0;
+  margin-inline: auto;
+  width: min(1340px, calc(100% - clamp(1.6rem, 5vw, 3rem)));
+  z-index: 800;
   display: flex; align-items: center; justify-content: space-between;
-  padding: clamp(1rem, 2.2vw, 1.7rem) var(--pad-x);
-  mix-blend-mode: difference;
+  padding: clamp(0.6rem, 1.2vw, 0.9rem) clamp(1rem, 1.8vw, 1.6rem);
+  color: var(--paper);
+  background: rgba(8, 8, 10, 0.42);
+  -webkit-backdrop-filter: blur(18px) saturate(1.5);
+  backdrop-filter: blur(18px) saturate(1.5);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 100px;
+  box-shadow: 0 14px 44px rgba(0, 0, 0, 0.45);
 }
 .nav__brand { display: flex; align-items: center; gap: 0.7rem; font-family: var(--font-display); font-weight: 800; letter-spacing: -0.02em; font-size: 1.15rem; }
 .nav__brand small { font-family: var(--font-mono); font-weight: 400; font-size: 0.55rem; letter-spacing: 0.3em; text-transform: uppercase; opacity: 0.7; display: block; }

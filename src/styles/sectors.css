@@ -78,9 +78,10 @@
   display: flex;
   flex-direction: column;
   /* extra top room so the "where we work / one standard" header clears the
-     fixed nav while the section is pinned; bottom trimmed to keep the whole
-     composition inside 100vh so the ledger never clips on short laptops. */
-  padding-top: clamp(5.5rem, 10vh, 7rem);
+     floating glass nav pill (with a comfortable gap below it) while the section
+     is pinned; bottom trimmed to keep the whole composition inside 100vh so the
+     ledger never clips on short laptops. */
+  padding-top: clamp(7rem, 12vh, 9rem);
   padding-bottom: clamp(1.6rem, 4vh, 3rem);
 }
 
