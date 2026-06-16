@@ -47,25 +47,28 @@ export function Edge() {
       const show = (i) => {
         if (i === current) return
         const incoming = stages[i]
-        const outgoing = stages[current]
         const dir = i > current ? 1 : -1
-        // promote only the two chapters actively wiping; clear every other so
-        // no chapter retains will-change after a fast scrub overwrites its
-        // onComplete (perf law: will-change only on actively animating els).
+        // OVERLAP-PROOF. The chapters are absolutely stacked, so any chapter
+        // left mid-fade shows through. Under a fast scrub, step 2->3->4 each
+        // started a 0.55s/0.65s tween on a DIFFERENT element; overwrite only
+        // clears tweens on the same target, so two or three chapters stayed
+        // partially visible and overlapped (the reported bug).
+        //
+        // Kill EVERY chapter's tweens and instantly hide all but the incoming,
+        // then wipe in only the incoming. Never more than one chapter on screen.
         stages.forEach((el) => {
-          if (el !== incoming && el !== outgoing) gsap.set(el, { willChange: 'auto' })
+          if (!el) return
+          gsap.killTweensOf(el)
+          if (el !== incoming) {
+            gsap.set(el, {
+              autoAlpha: 0,
+              yPercent: 6,
+              clipPath: 'inset(0% 0% 100% 0%)',
+              willChange: 'auto',
+            })
+          }
         })
-        gsap.set([incoming, outgoing], { willChange: 'transform, opacity, clip-path' })
-        // recede the old chapter
-        gsap.to(outgoing, {
-          autoAlpha: 0,
-          yPercent: -6 * dir,
-          clipPath: dir > 0 ? 'inset(0% 0% 100% 0%)' : 'inset(100% 0% 0% 0%)',
-          duration: 0.55,
-          ease: 'power2.inOut',
-          overwrite: true,
-          onComplete: () => gsap.set(outgoing, { willChange: 'auto' }),
-        })
+        gsap.set(incoming, { willChange: 'transform, opacity, clip-path' })
         // wipe in the new chapter
         gsap.fromTo(
           incoming,
@@ -78,7 +81,7 @@ export function Edge() {
             autoAlpha: 1,
             yPercent: 0,
             clipPath: 'inset(0% 0% 0% 0%)',
-            duration: 0.65,
+            duration: 0.6,
             ease: 'power3.out',
             overwrite: true,
             onComplete: () => gsap.set(incoming, { willChange: 'auto' }),

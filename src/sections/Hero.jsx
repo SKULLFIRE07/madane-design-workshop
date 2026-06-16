@@ -4,7 +4,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { MagneticButton } from '../components/MagneticButton'
 import { SafeBoundary } from '../components/ErrorBoundary'
 import { useCapable } from '../hooks/useCapable'
-import { montage, brand } from '../data/site'
+import { montage } from '../data/site'
 
 const ThreeField = lazy(() => import('../components/ThreeField').then((m) => ({ default: m.ThreeField })))
 
@@ -85,7 +85,7 @@ export function Hero({ started = false }) {
       </div>
 
       <div className="hero__strap" aria-hidden>
-        architecture &nbsp;|&nbsp; interiors &nbsp;|&nbsp; turnkey &nbsp;|&nbsp; {brand.website}
+        architecture &nbsp;|&nbsp; interiors &nbsp;|&nbsp; turnkey
       </div>
 
       <div className="hero__content wrap">
