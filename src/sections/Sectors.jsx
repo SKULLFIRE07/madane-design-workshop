@@ -118,27 +118,34 @@ export function Sectors() {
       mounted.current = true
       return
     }
+    // OVERLAP-PROOF SWAP. A vertical wipe (slide outgoing up through centre
+    // while sliding incoming up from below) breaks under fast scrubbing: a name
+    // that only just began entering becomes the "outgoing" and then sweeps the
+    // FULL band height back through the centre, crossing every other in-flight
+    // name. Multiple names pile up at the centre baseline (the reported bug).
+    //
+    // Fix: there is only ever ONE visible name. On every change we kill all
+    // name tweens and INSTANTLY park every non-active name (opacity 0, below the
+    // band), then slide + fade in only the active one. Nothing can overlap at
+    // any scroll speed because nothing else is on screen to overlap with.
     const dir = active >= prevActive.current ? 1 : -1
     bigRefs.current.forEach((el, i) => {
       if (!el) return
-      const on = i === active
-      const was = i === prevActive.current
-      if (reduce) {
-        gsap.set(el, { yPercent: on ? 0 : 110, opacity: on ? 1 : 0 })
-        return
-      }
-      if (on) {
-        gsap.fromTo(
-          el,
-          { yPercent: 112 * dir, opacity: 0 },
-          { yPercent: 0, opacity: 1, duration: 0.9, ease: 'power4.out', overwrite: true },
-        )
-      } else if (was) {
-        gsap.to(el, { yPercent: -108 * dir, opacity: 0, duration: 0.8, ease: 'power3.in', overwrite: true })
-      } else {
-        gsap.set(el, { yPercent: 112, opacity: 0 })
-      }
+      gsap.killTweensOf(el)
+      if (i !== active) gsap.set(el, { yPercent: 112, opacity: 0 })
     })
+    const activeEl = bigRefs.current[active]
+    if (activeEl) {
+      if (reduce) {
+        gsap.set(activeEl, { yPercent: 0, opacity: 1 })
+      } else {
+        gsap.fromTo(
+          activeEl,
+          { yPercent: 64 * dir, opacity: 0 },
+          { yPercent: 0, opacity: 1, duration: 0.7, ease: 'power4.out', overwrite: true },
+        )
+      }
+    }
     prevActive.current = active
   }, [active])
 

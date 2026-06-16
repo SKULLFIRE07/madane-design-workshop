@@ -77,7 +77,12 @@
   min-height: 100svh;
   display: flex;
   flex-direction: column;
-  padding-block: clamp(2rem, 5vh, 3.6rem);
+  /* extra top room so the "where we work / one standard" header clears the
+     floating glass nav pill (with a comfortable gap below it) while the section
+     is pinned; bottom trimmed to keep the whole composition inside 100vh so the
+     ledger never clips on short laptops. */
+  padding-top: clamp(7rem, 12vh, 9rem);
+  padding-bottom: clamp(1.6rem, 4vh, 3rem);
 }
 
 /* ---- TOP: eyebrow left, "one standard" through-line right ---- */

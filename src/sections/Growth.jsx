@@ -25,13 +25,39 @@ const yPct = (v, max) => PADT + (1 - v / max) * (BASE - PADT)
 const xLeft = (i) => (xPct(i) / VW) * 100
 const yTop = (v, max) => (yPct(v, max) / VH) * 100
 
+// Catmull-Rom → cubic Bézier: one smooth curve that passes THROUGH every node
+// (so the dots stay dead on the line) instead of jagged straight segments.
+// Returns just the C-command segments; callers prefix their own M/L start.
+function smoothCurve(pts) {
+  if (pts.length < 2) return ''
+  const f = 1 / 6 // control-point reach — keeps the curve tight to the data
+  const seg = []
+  for (let i = 0; i < pts.length - 1; i++) {
+    const p0 = pts[i - 1] || pts[i]
+    const p1 = pts[i]
+    const p2 = pts[i + 1]
+    const p3 = pts[i + 2] || p2
+    const c1x = p1.x + (p2.x - p0.x) * f
+    const c1y = p1.y + (p2.y - p0.y) * f
+    const c2x = p2.x - (p3.x - p1.x) * f
+    const c2y = p2.y - (p3.y - p1.y) * f
+    seg.push(`C ${c1x.toFixed(2)},${c1y.toFixed(2)} ${c2x.toFixed(2)},${c2y.toFixed(2)} ${p2.x.toFixed(2)},${p2.y.toFixed(2)}`)
+  }
+  return seg.join(' ')
+}
+
 function Chart({ accessor, format, max, gridStep, gridFmt, label, end, endUnit, growthLabel, idx }) {
   const pts = growth.map((g, i) => {
     const v = accessor(g)
     return { x: xPct(i), y: yPct(v, max), v, g, i }
   })
-  const line = pts.map((p) => `${p.x.toFixed(2)},${p.y.toFixed(2)}`).join(' ')
-  const area = `${pts[0].x.toFixed(2)},${BASE} ${line} ${pts[n - 1].x.toFixed(2)},${BASE}`
+  // smooth curve through all nodes; share it between the stroke + the fill
+  const curve = smoothCurve(pts)
+  const x0 = pts[0].x.toFixed(2)
+  const y0 = pts[0].y.toFixed(2)
+  const xN = pts[n - 1].x.toFixed(2)
+  const lineD = `M ${x0},${y0} ${curve}`
+  const areaD = `M ${x0},${BASE} L ${x0},${y0} ${curve} L ${xN},${BASE} Z`
 
   // value gridlines: a real reference scale on the left, every gridStep
   // strictly below the chart's max (keeps the top line off the headroom).
@@ -63,6 +89,12 @@ function Chart({ accessor, format, max, gridStep, gridFmt, label, end, endUnit, 
               <stop offset="0%" stopColor="rgba(255,255,255,0.20)" />
               <stop offset="100%" stopColor="rgba(255,255,255,0)" />
             </linearGradient>
+            {/* reveal mask: GSAP grows this rect's width 0 → 100 to wipe the
+                solid line + area on left-to-right. The line is NEVER dashed, so
+                it always renders continuous (no break-up under the stretch). */}
+            <clipPath id={`greveal-${idx}`}>
+              <rect className="gc-reveal" x="0" y="0" width={VW} height={VH} />
+            </clipPath>
           </defs>
 
           {/* sparse value grid */}
@@ -76,20 +108,23 @@ function Chart({ accessor, format, max, gridStep, gridFmt, label, end, endUnit, 
             <line className="gc-covidline" x1={covid.x} x2={covid.x} y1={PADT - 3} y2={BASE} />
           )}
 
-          {/* area fill under the line */}
-          <polygon className="gc-area" points={area} fill={`url(#gfill-${idx})`} />
+          {/* area + line revealed together by the growing clip rect */}
+          <g clipPath={`url(#greveal-${idx})`}>
+            {/* area fill under the line (smooth) */}
+            <path className="gc-area" d={areaD} fill={`url(#gfill-${idx})`} />
 
-          {/* THE drawn trend line */}
-          <polyline
-            className="gc-line"
-            points={line}
-            fill="none"
-            stroke="#ffffff"
-            strokeWidth="1.4"
-            strokeLinejoin="round"
-            strokeLinecap="round"
-            vectorEffect="non-scaling-stroke"
-          />
+            {/* THE solid trend line (smooth curve through every node) */}
+            <path
+              className="gc-line"
+              d={lineD}
+              fill="none"
+              stroke="#ffffff"
+              strokeWidth="1.4"
+              strokeLinejoin="round"
+              strokeLinecap="round"
+              vectorEffect="non-scaling-stroke"
+            />
+          </g>
 
           {/* baseline axis (draws across) */}
           <line className="gc-axis" x1={PADX} x2={VW - PADX} y1={BASE} y2={BASE} />
@@ -149,99 +184,73 @@ export function Growth() {
     const ctx = gsap.context(() => {
       const charts = gsap.utils.toArray('.gchart', el)
 
-      // prime each line's dash so it can be cleanly "drawn". Set via gsap so
-      // ctx.revert() cleans these inline styles up on unmount/HMR (no stale
-      // dash state leaking across remounts or resize refreshes).
-      el.querySelectorAll('.gc-line').forEach((path) => {
-        const len = path.getTotalLength()
-        gsap.set(path, { strokeDasharray: len, strokeDashoffset: reduce ? 0 : len })
-      })
-
       // Centring offsets for the HTML-overlaid labels are owned by GSAP
       // (xPercent/yPercent) — NOT a CSS translate() — because GSAP animates
       // y/scale on them and would otherwise clobber a CSS transform.
-      //   .gc-end   → centred on node Y (yPercent -50), nudged right via CSS margin
-      //   .gc-covid → centred on X, lifted above its node (yPercent -135)
-      //   .gc-xlabel→ centred on X (xPercent -50)
 
-      // ── reduced motion · final drawn state instantly ───────────────────
+      // final, fully-shown state for a chart (used for reduced motion + as the
+      // animation's end state). The reveal rect at full width = whole line shown.
+      const showFinal = (scope) => {
+        gsap.set(scope.querySelectorAll('.gc-reveal'), { attr: { width: VW } })
+        gsap.set(scope.querySelectorAll('.gc-area'), { opacity: 1 })
+        gsap.set(scope.querySelectorAll('.gc-axis'), { opacity: 1, scaleX: 1 })
+        gsap.set(scope.querySelectorAll('.gc-grid, .gc-covidline, .gc-vlabel'), { opacity: 1 })
+        gsap.set(scope.querySelectorAll('.gc-dot'), { opacity: 1, scale: 1 })
+        gsap.set(scope.querySelectorAll('.gc-xlabel'), { opacity: 1, xPercent: -50, y: 0 })
+        gsap.set(scope.querySelectorAll('.gc-end'), { opacity: 1, yPercent: -50, y: 0, scale: 1 })
+        gsap.set(scope.querySelectorAll('.gc-covid'), { opacity: 1, xPercent: -50, yPercent: -135, y: 0 })
+      }
+
       if (reduce) {
-        gsap.set(el.querySelectorAll('.gc-line'), { strokeDashoffset: 0, opacity: 1 })
-        gsap.set(el.querySelectorAll('.gc-area'), { opacity: 1 })
-        gsap.set(el.querySelectorAll('.gc-axis, .gc-grid, .gc-covidline, .gc-vlabel'), { opacity: 1 })
-        gsap.set(el.querySelectorAll('.gc-dot'), { opacity: 1, scale: 1 })
-        gsap.set(el.querySelectorAll('.gc-xlabel'), { opacity: 1, xPercent: -50, y: 0 })
-        gsap.set(el.querySelectorAll('.gc-end'), { opacity: 1, yPercent: -50, y: 0, scale: 1 })
-        gsap.set(el.querySelectorAll('.gc-covid'), { opacity: 1, xPercent: -50, yPercent: -135, y: 0 })
+        showFinal(el)
         return
       }
 
-      // initial hidden state
+      // initial state: frame hidden, line+area present but clipped to width 0
+      gsap.set(el.querySelectorAll('.gc-reveal'), { attr: { width: 0 } })
+      gsap.set(el.querySelectorAll('.gc-area'), { opacity: 1 })
       gsap.set(el.querySelectorAll('.gc-grid, .gc-covidline'), { opacity: 0 })
       gsap.set(el.querySelectorAll('.gc-axis'), { opacity: 0, scaleX: 0, transformOrigin: 'left center' })
-      gsap.set(el.querySelectorAll('.gc-area'), { opacity: 0 })
       gsap.set(el.querySelectorAll('.gc-vlabel'), { opacity: 0 })
-      gsap.set(el.querySelectorAll('.gc-dot'), { opacity: 0, scale: 0 })
+      gsap.set(el.querySelectorAll('.gc-dot'), { opacity: 0, scale: 0.6 })
       gsap.set(el.querySelectorAll('.gc-xlabel'), { opacity: 0, xPercent: -50, y: 5 })
-      gsap.set(el.querySelectorAll('.gc-end'), { opacity: 0, yPercent: -50, y: 10, scale: 0.94 })
+      gsap.set(el.querySelectorAll('.gc-end'), { opacity: 0, yPercent: -50, y: 10, scale: 0.96 })
       gsap.set(el.querySelectorAll('.gc-covid'), { opacity: 0, xPercent: -50, yPercent: -135, y: 6 })
 
-      // will-change ONLY on the line (its stroke-dashoffset redraws every
-      // frame of the scrub) — cleared on unmount by ctx.revert(). The area
-      // just fades opacity; it doesn't need a persistent compositor layer.
-      gsap.set(el.querySelectorAll('.gc-line'), { willChange: 'stroke-dashoffset' })
-
-      // ── ONE clean non-pinned scrubbed timeline drives BOTH charts ──────
-      // No pin → never traps scroll (desktop or mobile). Both lines draw
-      // together, tied tight to the scrollbar; great at any frozen frame.
+      // ── ONE play-once timeline (NOT scrubbed) drives BOTH charts in step ──
+      // The line is solid and revealed by growing the clip rect 0 → 100, so it
+      // is always continuous — never cut, never re-drawn on scroll.
       const tl = gsap.timeline({
-        defaults: { ease: 'none' },
-        scrollTrigger: {
-          trigger: el.querySelector('.growth__charts'),
-          start: 'top 75%',
-          end: 'bottom 60%',
-          scrub: 0.9,
-          invalidateOnRefresh: true,
-        },
+        scrollTrigger: { trigger: el.querySelector('.growth__charts'), start: 'top 78%', once: true },
       })
 
       charts.forEach((chart) => {
+        const reveal = chart.querySelector('.gc-reveal')
         const grid = chart.querySelectorAll('.gc-grid')
         const vlabels = chart.querySelectorAll('.gc-vlabel')
         const axis = chart.querySelector('.gc-axis')
-        const lineEl = chart.querySelector('.gc-line')
-        const areaEl = chart.querySelector('.gc-area')
         const covidLine = chart.querySelector('.gc-covidline')
         const dots = chart.querySelectorAll('.gc-dot')
         const xlabels = chart.querySelectorAll('.gc-xlabel')
         const end = chart.querySelector('.gc-end')
         const covid = chart.querySelector('.gc-covid')
-        const len = lineEl.getTotalLength()
 
-        // both charts animate over the SAME shared window (position 0..1),
-        // so they progress in lock-step with the scrollbar.
+        // 1 — frame settles in first (both charts share absolute positions)
+        tl.to(axis, { scaleX: 1, opacity: 1, duration: 0.5, ease: 'power2.out' }, 0)
+        tl.to(grid, { opacity: 1, duration: 0.5, stagger: 0.05 }, 0.05)
+        tl.to(vlabels, { opacity: 1, duration: 0.5, stagger: 0.05 }, 0.1)
+        tl.to(xlabels, { opacity: 1, y: 0, duration: 0.5, stagger: 0.04, ease: 'power2.out' }, 0.1)
 
-        // 1 — frame establishes first: baseline + grid + scale
-        tl.to(axis, { scaleX: 1, opacity: 1, duration: 0.1 }, 0)
-        tl.to(grid, { opacity: 1, duration: 0.12, stagger: 0.015 }, 0.02)
-        tl.to(vlabels, { opacity: 1, duration: 0.12, stagger: 0.015 }, 0.04)
-        tl.to(xlabels, { opacity: 1, y: 0, duration: 0.14, stagger: 0.014 }, 0.06)
+        // 2 — THE DRAW: clip rect width 0 → 100 wipes the solid line + area on
+        tl.to(reveal, { attr: { width: VW }, duration: 1.5, ease: 'power2.inOut' }, 0.3)
+        if (covidLine) tl.to(covidLine, { opacity: 1, duration: 0.5 }, 0.8)
 
-        // 2 — THE HERO BEAT: the trend line draws on, scrubbed dead-tight to
-        // scroll across the widest slice of the window so it's unmistakable.
-        tl.fromTo(lineEl, { strokeDashoffset: len }, { strokeDashoffset: 0, duration: 0.62 }, 0.14)
-        // the soft area fades up just behind the advancing line tip
-        tl.to(areaEl, { opacity: 1, duration: 0.5 }, 0.2)
+        // 3 — node dots fade in left-to-right, in step with the wipe
+        tl.to(dots, { opacity: 1, scale: 1, duration: 0.35, stagger: 0.13, ease: 'power2.out' }, 0.45)
 
-        // covid marker resolves as the line crosses it (~mid-draw)
-        if (covidLine) tl.to(covidLine, { opacity: 1, duration: 0.1 }, 0.32)
-
-        // 3 — node dots pop as the line passes through them
-        tl.to(dots, { opacity: 1, scale: 1, duration: 0.04, stagger: 0.04, ease: 'back.out(2)' }, 0.2)
-
-        // 4 — annotations land last: covid dip label, then the big end value
-        if (covid) tl.to(covid, { opacity: 1, y: 0, duration: 0.1, ease: 'power2.out' }, 0.5)
-        tl.to(end, { opacity: 1, y: 0, scale: 1, duration: 0.14, ease: 'power3.out' }, 0.8)
+        // 4 — annotations settle last: covid dip label, then the big end value
+        if (covid) tl.to(covid, { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out' }, 1.55)
+        tl.to(end, { opacity: 1, y: 0, scale: 1, duration: 0.5, ease: 'power3.out' }, 1.7)
       })
     }, ref)
 

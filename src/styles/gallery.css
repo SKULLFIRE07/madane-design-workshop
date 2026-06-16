@@ -11,7 +11,11 @@
    Desktop-only — mobile keeps premium.css's padding-block:0 stack. */
 @media (min-width: 861px) {
   .pg__viewport {
-    padding-block: clamp(86px, 15vh, 184px);
+    /* Enough vertical air for the zoomed centre plate (~1.45) NOT to clip,
+       but height-budgeted (vh-capped) so the whole column — header, stage,
+       and the big hero caption — still fits inside the pinned 100vh on short
+       / wide laptops. The old 15vh/184px overflowed and clipped the caption. */
+    padding-block: clamp(40px, 8vh, 110px);
   }
 }
 
