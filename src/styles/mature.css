@@ -1,0 +1,110 @@
+/* ============================================================
+   MATURE — final maturity pass. Loaded LAST.
+   Editorial restraint: serif display, no glows, crisp rectangles,
+   one-shot motion. Channels Chipperfield / Studio KO / Van Duysen.
+   ============================================================ */
+
+/* ---- headings: Fraunces, weight 400, no forced lowercase ---- */
+h1, h2, h3, h4 { font-weight: 400; }
+.hero__headline, .stats__title, .cap__title, .edge__title, .sectors__title,
+.works__title, .growth__title, .why__title, .studio__title, .studio__bannercap strong,
+.contact__big, .showcase__name, .po__title, .pr__headline, .clients__title,
+.pg__caption-name, .pg__card-name, .stats__maphead strong {
+  text-transform: none !important;
+  font-weight: 400 !important;
+  letter-spacing: -0.012em;
+}
+.mf__copy { text-transform: none !important; font-weight: 400 !important; }
+.cap__card h3, .edge__panel h3, .partner h3, .work__meta h3, .why__txt h3,
+.value__en, .clients__logo span, .sectors__name, .sectors__plabel, .cap__end p {
+  text-transform: none !important; font-weight: 500;
+}
+
+/* ---- eyebrows: Inter caps, restrained tracking ---- */
+.eyebrow, .pg__eyebrow, .pr__eyebrow, .gchart__metric, .showcase__sector,
+.clients__recenttag, .studio__bottom h4 {
+  font-family: var(--font-sans) !important;
+  letter-spacing: 0.18em !important;
+  color: var(--paper-faint) !important;
+}
+
+/* ---- crisp rectangles everywhere ---- */
+.glass, .work__media, .work__media::after, .stat, .cap__card, .partner, .po__shot,
+.gchart__plot, .sectors__preview, .field input, .pg__media, .po__cover,
+.studio__chips span, .edge__panel ul li, .works__filters button, .stats__country,
+.magnetic, .nav__cta, .contact__cta, .po__close, .rail button {
+  border-radius: 2px !important;
+}
+
+/* ---- kill ALL glows / gradient-text / coloured borders ---- */
+.hero__bharat { font-style: italic; }
+.progress-bar { box-shadow: none !important; }
+.gc-line, .im-arc, .im-head, .im-land, .g-line { filter: none !important; }
+.gc-dot, .g-dot, .edge__node span, .sectors__preview, .im-land {
+  box-shadow: none !important;
+}
+.edge__fill, .edge__node span { box-shadow: none !important; }
+.work:hover .work__media::after { border-color: var(--hairline) !important; }
+
+/* ---- remove idle / infinite animations (one-shot motion only) ---- */
+.hero__aurora { display: none !important; }
+/* one slow, premium photo drift (replaces the fast 4s montage churn) */
+.hero__frame { filter: grayscale(0.35) contrast(1.05) brightness(0.9) !important; transition: opacity 2.2s var(--ease-out) !important; }
+.hero__frame.is-active { opacity: 0.5 !important; animation: heroDrift 26s ease-out forwards !important; }
+@keyframes heroDrift { from { transform: scale(1.04); } to { transform: scale(1.12); } }
+.hero__veil {
+  background:
+    radial-gradient(125% 90% at 22% 30%, rgba(5,5,5,0.35), rgba(5,5,5,0.86) 72%),
+    linear-gradient(90deg, rgba(5,5,5,0.85) 0%, rgba(5,5,5,0.2) 55%, rgba(5,5,5,0.55) 100%),
+    linear-gradient(180deg, rgba(5,5,5,0.4) 0%, transparent 30%, rgba(5,5,5,0.95) 100%) !important;
+}
+.hero__cue i { animation: none !important; opacity: 0.5; }
+.indiamap__glow { display: none !important; }
+.why__grid-bg { animation: none !important; opacity: 0.25; }
+.clients__row { animation-duration: 80s; } /* much slower, calmer */
+.pg__grid { display: none !important; } /* drop faux-technical grid */
+
+/* ---- magnetic buttons: flat, quiet ---- */
+.magnetic::before { background: #fff !important; }
+
+/* ---- manifesto refrain: editorial italic emphasis, no glow ---- */
+.mf__w.is-refrain { font-style: italic; }
+
+/* ---- contact closing: line-mask reveal ---- */
+.cl-line { overflow: hidden; }
+
+/* ============ STATS — full world map + ledger (one-after-another) ============ */
+.stats__body { display: block !important; }
+.stats__mapwrap { display: block; margin: clamp(3rem, 6vw, 5rem) 0 0; max-width: none; }
+.stats__maphead { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 1rem; margin-bottom: clamp(1.5rem, 3vw, 2.5rem); }
+.stats__maphead strong { font-family: var(--font-display); font-weight: 400; font-size: clamp(1.2rem, 2vw, 1.9rem); color: var(--paper); letter-spacing: -0.01em; }
+.stats__maphead span { font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 0.14em; color: var(--paper-faint); text-transform: uppercase; }
+.stats__land {
+  width: 100%; aspect-ratio: 3.22; opacity: 0.92;
+  background: linear-gradient(170deg, #cfcfcf 0%, #8a8a8a 55%, #5a5a5a 100%);
+  -webkit-mask: url(/assets/worldmap.png) center / contain no-repeat;
+  mask: url(/assets/worldmap.png) center / contain no-repeat;
+}
+.stats__world { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 1.4rem; }
+.stats__country { font-family: var(--font-mono); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em; padding: 0.4rem 0.9rem; border: 1px solid var(--hairline); color: var(--paper-dim); border-radius: 2px; }
+.stats__grid {
+  display: grid !important; grid-template-columns: repeat(5, 1fr) !important; gap: 0 !important;
+  border-top: 1px solid var(--hairline); background: none !important; border-left: none !important;
+  margin-top: clamp(3rem, 6vw, 5rem);
+}
+@media (max-width: 900px) { .stats__grid { grid-template-columns: repeat(2, 1fr) !important; } }
+.stat {
+  position: relative; background: none !important; padding: clamp(1.6rem, 2.6vw, 2.4rem) 1rem clamp(1.6rem, 2.6vw, 2.4rem) 0;
+  border-right: 1px solid var(--hairline-soft); display: flex; flex-direction: column; min-height: auto;
+}
+.stat::after { content: ''; position: absolute; left: 0; bottom: -1px; height: 1px; width: var(--rule, 0%); background: var(--hairline); }
+.stat__val { font-family: var(--font-display) !important; font-weight: 400 !important; font-size: clamp(1.9rem, 3.6vw, 3.2rem) !important; color: #fff; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; line-height: 1; }
+.stat__label { font-family: var(--font-sans) !important; font-size: 0.72rem; letter-spacing: 0.02em; color: var(--paper-faint); margin-top: 0.7rem; line-height: 1.4; text-transform: none; }
+
+/* ============ PHILOSOPHY — clean inline word-mask (fixes overlap glitch) ============ */
+.pr__headline { line-height: 1.12 !important; display: flex; flex-wrap: wrap; column-gap: 0.28em; row-gap: 0.04em; }
+.pr__wmask { display: inline-block; overflow: hidden; padding: 0.1em 0.02em 0.18em; vertical-align: top; }
+.pr__word { display: inline-block; will-change: transform; }
+
+/* ---- focus ---- */
+:focus-visible { outline-color: #fff; }
