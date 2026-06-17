@@ -85,10 +85,37 @@ h1, h2, h3, h4 { font-weight: 400; }
 .stats__maphead strong { font-family: var(--font-display); font-weight: 400; font-size: clamp(1.2rem, 2vw, 1.9rem); color: var(--paper); letter-spacing: -0.01em; }
 .stats__maphead span { font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 0.14em; color: var(--paper-faint); text-transform: uppercase; }
 .stats__land {
+  position: relative;
+  --mx: 50%; --my: 50%;
   width: 100%; aspect-ratio: 3.22; opacity: 0.92;
   background: linear-gradient(170deg, #cfcfcf 0%, #8a8a8a 55%, #5a5a5a 100%);
   -webkit-mask: url(/assets/worldmap.png) center / contain no-repeat;
   mask: url(/assets/worldmap.png) center / contain no-repeat;
+  transition: filter 0.5s ease, opacity 0.5s ease;
+}
+/* cursor-following contour glow: a radial light masked by the same world shape,
+   so only the landmass under the cursor lights up (the map's contour). */
+.stats__land::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    240px 240px at var(--mx) var(--my),
+    rgba(120, 180, 255, 0.9) 0%,
+    rgba(120, 180, 255, 0.35) 32%,
+    rgba(120, 180, 255, 0) 62%
+  );
+  -webkit-mask: url(/assets/worldmap.png) center / contain no-repeat;
+  mask: url(/assets/worldmap.png) center / contain no-repeat;
+  mix-blend-mode: screen;
+  opacity: 0;
+  transition: opacity 0.45s ease;
+  pointer-events: none;
+}
+.stats__land.is-hover { filter: brightness(1.1); opacity: 1; }
+.stats__land.is-hover::after { opacity: 1; }
+@media (prefers-reduced-motion: reduce) {
+  .stats__land::after { display: none; }
 }
 .stats__world { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 1.4rem; }
 .stats__country { font-family: var(--font-mono); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em; padding: 0.4rem 0.9rem; border: 1px solid var(--hairline); color: var(--paper-dim); border-radius: 2px; }

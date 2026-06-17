@@ -39,7 +39,7 @@ export function Hero({ started = false }) {
       tl.from('.hero__eyebrow', { y: 30, opacity: 0, duration: 1, ease: 'expo.out' })
         .from('.hero__line .ln', { yPercent: 120, opacity: 0, stagger: 0.09, duration: 1.15, ease: 'expo.out' }, '-=0.7')
         .from('.hero__rally', { opacity: 0, letterSpacing: '0.8em', duration: 1.3, ease: 'expo.out' }, '-=0.8')
-        .from('.hero__sub, .hero__cta, .hero__cue', { y: 26, opacity: 0, stagger: 0.12, duration: 1, ease: 'expo.out' }, '-=0.9')
+        .from('.hero__sub, .hero__cta', { y: 26, opacity: 0, stagger: 0.12, duration: 1, ease: 'expo.out' }, '-=0.9')
         .from('.hero__strap', { opacity: 0, duration: 1 }, '-=1')
     }, root)
     return () => ctx.revert()
@@ -114,11 +114,6 @@ export function Hero({ started = false }) {
             our manifesto →
           </a>
         </div>
-      </div>
-
-      <div className="hero__cue" aria-hidden>
-        <i />
-        scroll
       </div>
     </section>
   )

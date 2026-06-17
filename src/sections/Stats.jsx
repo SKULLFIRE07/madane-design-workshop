@@ -9,6 +9,29 @@ gsap.registerPlugin(ScrollTrigger)
 
 export function Stats() {
   const ref = useRef(null)
+  const land = useRef(null)
+
+  // cursor-following contour glow on the world map
+  useLayoutEffect(() => {
+    const el = land.current
+    if (!el) return
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    const move = (e) => {
+      const r = el.getBoundingClientRect()
+      el.style.setProperty('--mx', `${((e.clientX - r.left) / r.width) * 100}%`)
+      el.style.setProperty('--my', `${((e.clientY - r.top) / r.height) * 100}%`)
+    }
+    const on = () => el.classList.add('is-hover')
+    const off = () => el.classList.remove('is-hover')
+    el.addEventListener('pointermove', move)
+    el.addEventListener('pointerenter', on)
+    el.addEventListener('pointerleave', off)
+    return () => {
+      el.removeEventListener('pointermove', move)
+      el.removeEventListener('pointerenter', on)
+      el.removeEventListener('pointerleave', off)
+    }
+  }, [])
 
   useLayoutEffect(() => {
     const el = ref.current
@@ -59,7 +82,7 @@ export function Stats() {
             <strong>Headquartered in Mumbai. Building across the world.</strong>
             <span>india · south korea · uae · usa</span>
           </div>
-          <div className="stats__land" aria-hidden />
+          <div className="stats__land" ref={land} aria-hidden />
           <div className="stats__world">
             {worldwide.map((c) => (
               <span key={c} className="stats__country">{c}</span>

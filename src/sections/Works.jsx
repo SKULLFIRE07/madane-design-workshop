@@ -99,7 +99,8 @@ export function Works({ onOpen }) {
         onEnter: (batch) =>
           gsap.fromTo(
             batch,
-            { clipPath: 'inset(100% 0% 0% 0%)' },
+            // reveal from the TOP downwards (bottom clipped -> open)
+            { clipPath: 'inset(0% 0% 100% 0%)' },
             {
               clipPath: 'inset(0% 0% 0% 0%)',
               duration: 0.9,
