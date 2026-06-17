@@ -132,7 +132,7 @@ main { display: block; }
 
 /* ===================== MANIFESTO ===================== */
 .mf { position: relative; background: #000; }
-.mf__inner { min-height: 100svh; display: flex; flex-direction: column; justify-content: center; padding-block: 8vh; }
+.mf__inner { min-height: 100svh; display: flex; flex-direction: column; justify-content: center; padding-top: clamp(7.5rem, 14vh, 10rem); padding-bottom: clamp(3rem, 8vh, 6rem); }
 .mf__eyebrow { margin-bottom: clamp(1.5rem, 4vw, 2.5rem); }
 .mf__copy {
   font-family: var(--font-display); font-weight: 500;

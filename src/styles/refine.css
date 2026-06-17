@@ -34,7 +34,7 @@ body { background: #040404; }
 }
 
 /* ---- manifesto: tighter, more editorial ---- */
-.mf__copy { text-transform: lowercase; font-weight: 600; font-size: clamp(1.8rem, 4.6vw, 4.2rem); line-height: 1.22; max-width: 20ch; }
+.mf__copy { text-transform: lowercase; font-weight: 600; font-size: clamp(1.6rem, 4vw, 3.5rem); line-height: 1.14; max-width: 32ch; }
 .mf__motto { font-family: var(--font-display) !important; font-style: italic; color: var(--paper-dim) !important; font-size: clamp(0.95rem, 1.8vw, 1.3rem) !important; }
 
 /* ============ SHOWCASE ============ */
@@ -192,7 +192,7 @@ body { background: #040404; }
 .gc-tag.is-covid { color: #b4b4b4; border-color: rgba(180,180,180,0.4); }
 .gc-xlabel { position: absolute; bottom: 4%; transform: translateX(-50%); font-family: var(--font-mono); font-size: clamp(0.52rem, 0.95vw, 0.72rem); color: var(--paper-faint); opacity: 0; }
 @media (max-width: 600px) { .gc-xlabel { font-size: 0.46rem; } }
-.gc-covid { position: absolute; bottom: -1.7rem; transform: translateX(-50%); font-family: var(--font-mono); font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; color: #b4b4b4; padding: 0.2rem 0.7rem; border: 1px solid rgba(180,180,180,0.35); border-radius: 100px; }
+.gc-covid { position: absolute; bottom: -1.7rem; transform: translateX(-50%); font-family: var(--font-mono); font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; color: #b4b4b4; }
 .gchart__side { display: flex; flex-direction: column; justify-content: space-between; padding: 1.2rem 0; }
 .gchart__metric { font-family: var(--font-mono); font-size: 0.74rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--paper-dim); line-height: 1.5; }
 .gchart__growth { display: flex; flex-direction: column; gap: 0.1rem; }

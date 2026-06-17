@@ -12,7 +12,6 @@ import { Stats } from './sections/Stats'
 import { Capabilities } from './sections/Capabilities'
 import { Edge } from './sections/Edge'
 import { Sectors } from './sections/Sectors'
-import ProjectsGallery from './sections/ProjectsGallery'
 import { Works } from './sections/Works'
 import { Growth } from './sections/Growth'
 import { WhyMadane } from './sections/WhyMadane'
@@ -73,7 +72,6 @@ export default function App() {
         <Capabilities />
         <Edge />
         <Sectors />
-        <ProjectsGallery onOpen={setActive} />
         <Works onOpen={setActive} />
         <Growth />
         <WhyMadane />

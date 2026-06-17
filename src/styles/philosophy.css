@@ -20,8 +20,14 @@
 .pr__sticky {
   min-height: 100vh;
   display: flex;
-  align-items: center;
+  /* top-align (not centre): on short laptops the text column is taller than the
+     viewport, and centring pushed its top (01 — 05 index + eyebrow + lede) up
+     behind the floating nav. Anchoring to the top keeps the important head
+     visible just under the nav; only the trailing body can run long. */
+  align-items: flex-start;
   overflow: hidden;
+  padding-top: clamp(6rem, 11vh, 8.5rem);
+  padding-bottom: clamp(1.5rem, 3vh, 2.5rem);
 }
 
 .pr__grid {
@@ -29,7 +35,8 @@
   display: grid;
   /* a touch more room for the photo; text column breathes wider */
   grid-template-columns: 53% 47%;
-  align-items: center;
+  /* top-align both columns so the 01 index lines up with the photo's top edge */
+  align-items: start;
   gap: clamp(2.5rem, 6vw, 7rem);
   padding: 0 clamp(1.5rem, 6vw, 8rem);
 }

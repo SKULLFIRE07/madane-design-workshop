@@ -82,7 +82,7 @@
      is pinned; bottom trimmed to keep the whole composition inside 100vh so the
      ledger never clips on short laptops. */
   padding-top: clamp(7rem, 12vh, 9rem);
-  padding-bottom: clamp(1.6rem, 4vh, 3rem);
+  padding-bottom: clamp(2.6rem, 5.5vh, 4rem);
 }
 
 /* ---- TOP: eyebrow left, "one standard" through-line right ---- */
@@ -154,7 +154,9 @@
 .sx__big {
   position: absolute;
   left: 0;
-  bottom: 0;
+  /* lift off the band floor so descenders (g/y/p) clear the overflow clip;
+     the band has slack at the top, so raising the baseline is safe */
+  bottom: 0.2em;
   max-width: 100%;
   margin: 0;
   font-family: var(--font-display);
