@@ -289,6 +289,78 @@
 .sw-detail__btn:hover { background: transparent; color: var(--paper); }
 .sw-detail__btn:hover span { transform: translateX(5px); }
 
+/* =======================================================================
+   hand-drawn ornaments · marker notes + curved arrow + sparks
+   decorative only (pointer-events: none); fade out while a project is open
+   ======================================================================= */
+.sw-orn {
+  position: absolute;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  /* vibrant premium accent for all ornaments */
+  --orn: #9d7bff;
+  --orn-bright: #b79bff;
+}
+.sw.is-focused .sw-orn { opacity: 0; transition: opacity 0.4s var(--ease-out); }
+
+.sw-orn__note { position: absolute; display: flex; align-items: flex-start; gap: 0.3rem; }
+.sw-orn__hand {
+  font-family: 'Caveat', cursive;
+  font-weight: 600;
+  font-size: clamp(1.4rem, 2.4vw, 2.2rem);
+  line-height: 0.9;
+  color: var(--orn-bright);
+  text-shadow: 0 0 22px rgba(157, 123, 255, 0.45);
+  transform: rotate(-7deg);
+  white-space: nowrap;
+}
+.sw-orn__hand--sm {
+  font-size: clamp(1.05rem, 1.7vw, 1.5rem);
+  color: var(--orn);
+  transform: rotate(5deg);
+}
+
+/* note A: nudged inward + down so it clears the edge and the hint row */
+.sw-orn__note--a { top: 64%; left: 69%; right: auto; }
+.sw-orn__arrow {
+  width: clamp(64px, 7vw, 104px);
+  height: auto;
+  margin-top: 0.2rem;
+  overflow: visible;
+}
+.sw-orn__draw {
+  stroke: var(--orn);
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 0 8px rgba(157, 123, 255, 0.5));
+}
+
+/* note B: lower-left, sits in the empty margin under the scatter */
+.sw-orn__note--b { bottom: clamp(2rem, 6vh, 4.5rem); left: clamp(5%, 9vw, 11%); }
+
+/* spark marks */
+.sw-orn__spark path {
+  stroke: var(--orn-bright);
+  stroke-width: 2;
+  stroke-linecap: round;
+  fill: none;
+}
+.sw-orn__spark {
+  position: absolute;
+  width: clamp(26px, 2.4vw, 38px);
+  height: auto;
+  filter: drop-shadow(0 0 7px rgba(157, 123, 255, 0.55));
+}
+.sw-orn__spark--1 { top: clamp(7rem, 15vh, 11rem); left: 41%; }
+.sw-orn__spark--2 { bottom: 18%; right: 7%; transform: rotate(18deg); }
+
+@media (max-width: 640px) {
+  .sw-orn__note--a { left: 8%; right: auto; top: 12rem; }
+  .sw-orn__spark--1 { left: 8%; }
+}
+
 /* ---- reduced motion / no-pointer: keep it static & legible ---- */
 @media (prefers-reduced-motion: reduce) {
   .sw-inner { transition: none; }

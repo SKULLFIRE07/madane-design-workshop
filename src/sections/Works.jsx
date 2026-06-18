@@ -46,7 +46,7 @@ const mulberry32 = (seed) => () => {
  * rotated and resized. The even-row base = "intentional"; the jitter = "alive".
  * Returns per-item { xPct, yPct, rot, w, ar, z, depth } in stage space.
  */
-const buildLayout = (n, { rows, wMin, wMax, jitterX, jitterY, maxRot, marginX, marginY }) => {
+const buildLayout = (n, { rows, wMin, wMax, jitterX, jitterY, maxRot, marginX, marginY, rowStagger = 0 }) => {
   const rng = mulberry32(20240617)
   const perRow = Array.from({ length: rows }, (_, r) =>
     Math.floor(n / rows) + (r < n % rows ? 1 : 0)
@@ -54,10 +54,15 @@ const buildLayout = (n, { rows, wMin, wMax, jitterX, jitterY, maxRot, marginX, m
   const out = []
   let i = 0
   perRow.forEach((count, r) => {
+    // shift whole rows left/right so columns don't line up into clean lanes
+    const shift = (r % 2 ? 1 : -1) * rowStagger
     for (let j = 0; j < count; j++, i++) {
       const usableX = 100 - marginX * 2
       const usableY = 100 - marginY * 2
-      const baseX = marginX + ((j + 0.5) / count) * usableX
+      // pack each row across a slightly tighter span (kills the dead centre gap)
+      const span = 0.82
+      const lead = (1 - span) / 2
+      const baseX = marginX + (lead + ((j + 0.5) / count) * span) * usableX + shift
       const baseY = marginY + ((r + 0.5) / rows) * usableY
       const x = baseX + (rng() - 0.5) * jitterX
       const y = baseY + (rng() - 0.5) * jitterY
@@ -283,6 +288,13 @@ export function Works({ onOpen }) {
         const targetX = detailOpen ? stageW * 0.34 : stageW * 0.5
         const targetY = detailOpen ? stageH * 0.42 : stageH * 0.46
 
+        // scale to a TARGET size (not a fixed multiplier) so small + large
+        // photos all open to a consistent, generous focal size
+        const targetW = detailOpen
+          ? Math.min(stageW * 0.39, stageH * 0.71 * L[i].ar, 598)
+          : Math.min(stageW * 0.71, stageH * 0.76 * L[i].ar, 644)
+        const focusScale = gsap.utils.clamp(1.4, 4, targetW / L[i].w)
+
         const tl = gsap.timeline({ defaults: { ease: 'elastic.out(0.7, 0.7)' } })
         // move focused photo toward centre (spring-like)
         tl.to(layerOf(card, '.sw-mag'), {
@@ -291,7 +303,7 @@ export function Works({ onOpen }) {
           duration: 1.1,
         }, 0)
         tl.to(layerOf(card, '.sw-inner'), {
-          scale: 1.4,
+          scale: focusScale,
           rotation: 0,
           x: 0,
           y: 0,
@@ -434,13 +446,13 @@ export function Works({ onOpen }) {
       const mm = gsap.matchMedia()
       mm.add('(min-width: 1025px)', () => {
         stage.current.classList.add('sw-stage--side')
-        place({ rows: 4, wMin: 120, wMax: 224, jitterX: 9, jitterY: 9, maxRot: 12, marginX: 11, marginY: 12 })
+        place({ rows: 4, wMin: 104, wMax: 184, jitterX: 9, jitterY: 6, maxRot: 11, marginX: 7, marginY: 10, rowStagger: 9 })
         buildQuick(); buildFloats()
         return () => floats.forEach((t) => t.kill())
       })
       mm.add('(min-width: 641px) and (max-width: 1024px)', () => {
         stage.current.classList.remove('sw-stage--side')
-        place({ rows: 5, wMin: 104, wMax: 168, jitterX: 7, jitterY: 7, maxRot: 9, marginX: 13, marginY: 9 })
+        place({ rows: 5, wMin: 92, wMax: 148, jitterX: 7, jitterY: 5, maxRot: 9, marginX: 9, marginY: 8, rowStagger: 7 })
         buildQuick(); buildFloats()
         return () => floats.forEach((t) => t.kill())
       })
@@ -471,6 +483,42 @@ export function Works({ onOpen }) {
           },
         })
       }
+
+      /* ---- ornaments: arrow self-draws, notes fade in, sparks twinkle ---- */
+      const hands = gsap.utils.toArray('.sw-orn__hand', root.current)
+      const draws = gsap.utils.toArray('.sw-orn__draw', root.current)
+      const sparks = gsap.utils.toArray('.sw-orn__spark, .sw-orn__star', root.current)
+      gsap.set(hands, { autoAlpha: 0, y: 10 })
+      if (!reduce) gsap.set(sparks, { autoAlpha: 0, scale: 0.4, transformOrigin: '50% 50%' })
+      draws.forEach((path) => {
+        const len = path.getTotalLength?.() || 200
+        gsap.set(path, { strokeDasharray: len, strokeDashoffset: reduce ? 0 : len })
+      })
+      ScrollTrigger.create({
+        trigger: root.current,
+        start: 'top 70%',
+        once: true,
+        onEnter: () => {
+          gsap.to(hands, { autoAlpha: 1, y: 0, duration: 0.7, stagger: 0.25, ease: 'power2.out', delay: 0.3 })
+          if (!reduce) {
+            gsap.to(draws, { strokeDashoffset: 0, duration: 1.1, ease: 'power2.inOut', delay: 0.5 })
+            gsap.to(sparks, {
+              autoAlpha: 1, scale: 1, duration: 0.6, ease: 'back.out(2)', stagger: 0.15, delay: 0.7,
+              onComplete: () => {
+                // gentle perpetual twinkle
+                sparks.forEach((s, k) =>
+                  gsap.to(s, {
+                    autoAlpha: 0.45, scale: 0.86, duration: 1.6 + (k % 3) * 0.4,
+                    repeat: -1, yoyo: true, ease: 'sine.inOut', delay: (k % 4) * 0.3,
+                  })
+                )
+              },
+            })
+          } else {
+            gsap.set(sparks, { autoAlpha: 1, scale: 1 })
+          }
+        },
+      })
     }, root)
 
     return () => { runCleanups(); ctx.revert() }
@@ -535,6 +583,28 @@ export function Works({ onOpen }) {
             View Project<span aria-hidden="true">→</span>
           </button>
         </aside>
+      </div>
+
+      {/* hand-drawn editorial ornaments — purely decorative, never block clicks */}
+      <div className="sw-orn" aria-hidden="true">
+        <div className="sw-orn__note sw-orn__note--a">
+          <span className="sw-orn__hand">tap to step inside</span>
+          <svg className="sw-orn__arrow" viewBox="0 0 130 86" fill="none">
+            <path className="sw-orn__draw" d="M4 12 C 36 6, 84 8, 112 44 C 120 55, 122 64, 120 74" />
+            <path className="sw-orn__draw" d="M104 58 L121 76 L126 52" />
+          </svg>
+        </div>
+
+        <div className="sw-orn__note sw-orn__note--b">
+          <span className="sw-orn__hand sw-orn__hand--sm">built, not rendered</span>
+        </div>
+
+        <svg className="sw-orn__spark sw-orn__spark--1" viewBox="0 0 44 44" fill="none">
+          <path d="M22 4 L22 18" /><path d="M34 10 L26 20" /><path d="M10 10 L18 20" />
+        </svg>
+        <svg className="sw-orn__spark sw-orn__spark--2" viewBox="0 0 44 44" fill="none">
+          <path d="M22 4 L22 18" /><path d="M34 10 L26 20" /><path d="M10 10 L18 20" />
+        </svg>
       </div>
     </section>
   )

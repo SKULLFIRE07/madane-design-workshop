@@ -39,3 +39,107 @@
 @media (prefers-reduced-motion: reduce) {
   .mdn-grain, .mdn-drop { animation: none; }
 }
+
+/* =======================================================================
+   CAD / blueprint underlay · faint architectural line work for the intro
+   (fine grid, edge rulers with tick scales, coordinate stamps, a dimension
+   line on the lockup). Kept very light; GSAP fades the whole layer in.
+   ======================================================================= */
+.mdn-cad {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0;            /* GSAP fades this in during ACQUIRE */
+  --cad: rgba(244, 241, 234, 0.5);
+  font-family: 'Space Mono', monospace;
+}
+
+/* fine blueprint grid — minor 40px squares + major 200px squares */
+.mdn-bp {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(244, 241, 234, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(244, 241, 234, 0.05) 1px, transparent 1px),
+    linear-gradient(rgba(244, 241, 234, 0.022) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(244, 241, 234, 0.022) 1px, transparent 1px);
+  background-size: 200px 200px, 200px 200px, 40px 40px, 40px 40px;
+  background-position: -1px -1px, -1px -1px, -1px -1px, -1px -1px;
+  -webkit-mask-image: radial-gradient(ellipse at 50% 46%, #000 30%, rgba(0,0,0,0.35) 70%, transparent 100%);
+          mask-image: radial-gradient(ellipse at 50% 46%, #000 30%, rgba(0,0,0,0.35) 70%, transparent 100%);
+}
+
+/* edge rulers — major + minor tick marks like a scale */
+.mdn-ruler { position: absolute; opacity: 0.6; }
+.mdn-ruler--top {
+  top: 0; left: 0; right: 0; height: 14px;
+  background-image:
+    repeating-linear-gradient(90deg, rgba(244,241,234,0.16) 0 1px, transparent 1px 100px),
+    repeating-linear-gradient(90deg, rgba(244,241,234,0.09) 0 1px, transparent 1px 20px);
+  background-size: 100% 14px, 100% 7px;
+  background-position: 0 0, 0 0;
+  background-repeat: repeat-x;
+}
+.mdn-ruler--left {
+  top: 0; bottom: 0; left: 0; width: 14px;
+  background-image:
+    repeating-linear-gradient(0deg, rgba(244,241,234,0.16) 0 1px, transparent 1px 100px),
+    repeating-linear-gradient(0deg, rgba(244,241,234,0.09) 0 1px, transparent 1px 20px);
+  background-size: 14px 100%, 7px 100%;
+  background-repeat: repeat-y;
+}
+
+/* coordinate / sheet stamps in each corner */
+.mdn-coord {
+  position: absolute;
+  font-size: 9px;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: rgba(244, 241, 234, 0.34);
+}
+.mdn-coord--tl { top: 22px; left: 24px; }
+.mdn-coord--tr { top: 22px; right: 92px; }   /* clear of the Skip button */
+.mdn-coord--bl { bottom: 22px; left: 24px; }
+.mdn-coord--br { bottom: 22px; right: 24px; }
+
+/* dimension line under the lockup — witness ticks + line + measure label */
+.mdn-cad-dim {
+  position: absolute;
+  left: 50%;
+  top: 63%;
+  transform: translateX(-50%);
+  width: min(300px, 46vh);
+  height: 24px;
+}
+.mdn-dim-line {
+  position: absolute;
+  left: 0; right: 0; top: 50%;
+  height: 1px;
+  background: rgba(244, 241, 234, 0.32);
+}
+/* arrow/witness ticks at each end (slim diagonal caps) */
+.mdn-dim-ext {
+  position: absolute;
+  top: 50%;
+  width: 1px; height: 14px;
+  background: rgba(244, 241, 234, 0.32);
+  transform: translateY(-50%);
+}
+.mdn-dim-ext--l { left: 0; }
+.mdn-dim-ext--r { right: 0; }
+.mdn-dim-label {
+  position: absolute;
+  left: 50%; top: 50%;
+  transform: translate(-50%, -50%);
+  padding: 0 8px;
+  background: #050505;
+  font-size: 9px;
+  letter-spacing: 0.24em;
+  color: rgba(244, 241, 234, 0.5);
+}
+
+@media (max-width: 760px) {
+  .mdn-coord--tr { right: 80px; }
+  .mdn-cad-dim { width: min(240px, 60vw); }
+}

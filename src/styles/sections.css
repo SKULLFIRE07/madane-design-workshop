@@ -82,12 +82,17 @@ main { display: block; }
 .hero__line .ln { display: inline-block; }
 .hero__bharat {
   /* the one bold bharat moment — Devanagari "भारत" in the Indian-flag tricolor
-     (saffron / white / india-green). Crisp bands read unmistakably as the flag. */
+     (saffron / white / india-green). Written akshara by akshara on load: each
+     cluster (.bch) is its own tricolor unit, inked in left→right by GSAP. */
   font-family: var(--font-sanskrit);
   font-style: normal;
   font-weight: 600;
   font-size: 1.08em;          /* sized larger so भारत reads bolder next to the Latin */
   line-height: 0.86;
+  display: inline-block;
+  vertical-align: baseline;
+}
+.hero__bharat .bch {
   display: inline-block;
   vertical-align: baseline;
   background: linear-gradient(180deg,
@@ -96,6 +101,7 @@ main { display: block; }
     #138808 66%, #138808 100%);
   -webkit-background-clip: text; background-clip: text;
   -webkit-text-fill-color: transparent; color: transparent;
+  will-change: clip-path;
 }
 .hero__rally {
   font-family: var(--font-mono);
