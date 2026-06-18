@@ -28,7 +28,7 @@ let hasPlayed = false
 
 const PALETTE = { bg: '#050505', ink: '#f4f1ea' }
 
-export default function HeroIntro({ onComplete, speed = 1 }) {
+export default function HeroIntro({ onComplete, speed = 1.3 }) {
   const stageRef = useRef(null)
   const [done, setDone] = useState(hasPlayed)
 
@@ -153,7 +153,7 @@ export default function HeroIntro({ onComplete, speed = 1 }) {
       handedOff = true
       tearDownFilter()
       const stage = root
-      gsap.delayedCall(reduce ? 0.25 : 1.2, () => {
+      gsap.delayedCall(reduce ? 0.25 : 0.8, () => {
         gsap.to(stage, {
           opacity: 0, duration: reduce ? 0.4 : 0.8, ease: 'power2.inOut',
           onStart: () => onComplete?.(),
@@ -175,7 +175,10 @@ export default function HeroIntro({ onComplete, speed = 1 }) {
       if (tl) tl.kill()
       if (breath) breath.kill()
 
-      const counter = q('.mdn-counter')
+      const constr = q('.mdn-constr')
+      const plines = qa('.mdn-constr .pl')
+      const glines = qa('.mdn-constr .pg')
+      const nlines = qa('.mdn-constr .pn')
       const wrap = q('.mdn-logo-wrap')
       const disp = q('#mdn-disp')
       const blur = q('#mdn-blur')
@@ -190,6 +193,8 @@ export default function HeroIntro({ onComplete, speed = 1 }) {
       const cue = q('.mdn-cue')
       const brushDisp = q('#mdn-brush-disp')
       const brush2Disp = q('#mdn-brush2-disp')
+      const cad = q('.mdn-cad')
+      const cadDim = q('.mdn-cad-dim')
 
       buildPathPoints()
       setupCanvas()
@@ -218,10 +223,17 @@ export default function HeroIntro({ onComplete, speed = 1 }) {
       if (gh.length) g.set(gh, { scaleX: 0, opacity: 1 })
       if (cornersWrap) g.set(cornersWrap, { width: openW, height: openH, opacity: 0 })
       if (corners.length) g.set(corners, { width: 60, height: 60 })
+      if (cad) g.set(cad, { opacity: 0 })
+      if (cadDim) g.set(cadDim, { opacity: 0 })
+      // construction diagram: hide, prime solid edges for stroke-draw
+      if (constr) g.set(constr, { opacity: 0 })
+      if (glines.length) g.set(glines, { opacity: 0 })
+      if (nlines.length) g.set(nlines, { opacity: 0 })
+      plines.forEach((p) => { const L = p.getTotalLength(); g.set(p, { strokeDasharray: L, strokeDashoffset: L }) })
 
       // ── reduced motion: settle straight to focus ──
       if (reduce) {
-        if (counter) counter.style.display = 'none'
+        if (constr) g.set(constr, { opacity: 0 })
         tearDownFilter()
         drawMark(st.pathLen + 1)
         drawWord(1.01)
@@ -229,6 +241,7 @@ export default function HeroIntro({ onComplete, speed = 1 }) {
         if (datum) g.set(datum, { opacity: 0 })
         if (gridLines.length) g.set(gridLines, { opacity: 0 })
         if (cornersWrap) g.set(cornersWrap, { opacity: 0 })
+        if (cad) g.set(cad, { opacity: 0 })
         const t = g.timeline({ onComplete: handoff })
         t.fromTo(wrap, { opacity: 0, scale: 1.04 }, { opacity: 1, scale: 1, duration: 1.0, ease: 'power2.out' }, 0)
         if (glow) t.to(glow, { opacity: 1, scale: 1, duration: 1.0, ease: 'power2.out' }, 0)
@@ -239,13 +252,14 @@ export default function HeroIntro({ onComplete, speed = 1 }) {
 
       // ── full cinematic timeline ──
       enableFilter()
-      if (counter) { counter.style.display = ''; counter.style.opacity = '1'; counter.textContent = '000' }
       if (disp) g.set(disp, { attr: { scale: 64 } })
       if (blur) g.set(blur, { attr: { stdDeviation: 7 } })
       if (wrap) wrap.style.willChange = 'transform, opacity'
 
-      const ctr = { v: 0 }
       const t = g.timeline({ onComplete: handoff })
+
+      // 0. CAD blueprint underlay fades in first (and stays through the reveal)
+      if (cad) t.to(cad, { opacity: 1, duration: 1.1, ease: 'power2.out' }, 0.05)
 
       // 1. ACQUIRE
       if (datum) t.fromTo(datum, { scaleX: 0 }, { scaleX: 1, duration: 0.95, ease: 'power3.inOut' }, 0.1)
@@ -254,15 +268,18 @@ export default function HeroIntro({ onComplete, speed = 1 }) {
       if (gh.length) t.to(gh, { scaleX: 1, duration: 0.8, ease: 'power2.out', stagger: 0.05 }, 0.2)
       if (cornersWrap) t.to(cornersWrap, { opacity: 1, duration: 0.6, ease: 'power2.out' }, 0.15)
 
-      // 2. counter
-      if (counter) {
-        t.to(ctr, { v: 100, duration: 1.3, ease: 'power1.inOut', onUpdate: () => { counter.textContent = String(Math.round(ctr.v)).padStart(3, '0') } }, 0.2)
-        t.to(counter, { opacity: 0, y: -6, duration: 0.4, ease: 'power2.out' }, 1.55)
+      // 2. construction diagram — a pyramid draws itself, line by line
+      if (constr) {
+        t.to(constr, { opacity: 1, duration: 0.35, ease: 'power2.out' }, 0.2)
+        if (glines.length) t.to(glines, { opacity: 1, duration: 0.5, ease: 'power2.out', stagger: 0.05 }, 0.3)
+        if (plines.length) t.to(plines, { strokeDashoffset: 0, duration: 0.5, ease: 'power2.inOut', stagger: 0.11 }, 0.45)
+        if (nlines.length) t.to(nlines, { opacity: 1, duration: 0.45, ease: 'power2.out', stagger: 0.06 }, 1.1)
       }
 
       // 3. CONVERGE
       const CV = 1.6
       if (gridLines.length) t.to(gridLines, { opacity: 0, duration: 0.55, ease: 'power2.in' }, CV)
+      if (constr) t.to(constr, { opacity: 0, duration: 0.55, ease: 'power2.in' }, CV)
       if (vdatum) t.to(vdatum, { scaleY: 0, opacity: 0, duration: 0.75, ease: 'power3.inOut' }, CV)
       if (datum) t.to(datum, { opacity: 0, duration: 0.6, ease: 'power2.in' }, CV)
       if (cornersWrap) t.to(cornersWrap, { width: Wc, height: Hc, duration: 0.95, ease: 'power3.inOut' }, CV)
@@ -277,6 +294,11 @@ export default function HeroIntro({ onComplete, speed = 1 }) {
 
       // 5. ink glow
       if (glow) t.fromTo(glow, { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 1.3, ease: 'power2.out' }, RS + 0.05)
+
+      // 5b. dimension line draws onto the lockup as the disc resolves
+      if (cadDim) {
+        t.fromTo(cadDim, { opacity: 0, scaleX: 0.6 }, { opacity: 1, scaleX: 1, duration: 0.9, ease: 'power3.out', transformOrigin: '50% 50%' }, RS + 0.4)
+      }
 
       // 6. the mark draws itself
       const MS = RS + 0.85
@@ -358,6 +380,23 @@ export default function HeroIntro({ onComplete, speed = 1 }) {
         </defs>
       </svg>
 
+      {/* architectural / CAD blueprint underlay — very light line work */}
+      <div className="mdn-cad" aria-hidden="true">
+        <div className="mdn-bp" />
+        <div className="mdn-ruler mdn-ruler--top" />
+        <div className="mdn-ruler mdn-ruler--left" />
+        <div className="mdn-coord mdn-coord--tl">X 0.000 · Y 0.000</div>
+        <div className="mdn-coord mdn-coord--tr">MDW · SHEET 01</div>
+        <div className="mdn-coord mdn-coord--bl">SCALE 1:1</div>
+        <div className="mdn-coord mdn-coord--br">UNITS · MM</div>
+        <div className="mdn-cad-dim">
+          <span className="mdn-dim-ext mdn-dim-ext--l" />
+          <span className="mdn-dim-ext mdn-dim-ext--r" />
+          <span className="mdn-dim-line" />
+          <span className="mdn-dim-label">356.00</span>
+        </div>
+      </div>
+
       {/* centered logo lockup */}
       <div style={{ position: 'absolute', inset: 0, zIndex: 2, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
         <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', width: 'min(356px, 56vh)', maxWidth: '80vw' }}>
@@ -394,8 +433,34 @@ export default function HeroIntro({ onComplete, speed = 1 }) {
         <span className="mdn-cnr" style={{ position: 'absolute', bottom: 0, right: 0, width: 60, height: 60, borderBottom: '1px solid rgba(244,241,234,0.28)', borderRight: '1px solid rgba(244,241,234,0.28)' }} />
       </div>
 
-      {/* counter */}
-      <div className="mdn-counter" style={{ position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%, calc(-50% - 26px))', zIndex: 6, fontFamily: "'Space Mono', monospace", fontSize: 12, letterSpacing: '0.34em', color: 'rgba(244,241,234,0.82)', paddingLeft: '0.34em' }}>000</div>
+      {/* construction diagram — a pyramid drawn line by line (replaces counter) */}
+      <svg className="mdn-constr" viewBox="0 0 452 360" aria-hidden="true"
+        style={{ position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%,-50%)', width: 'min(460px, 62vh)', height: 'auto', zIndex: 6, opacity: 0, overflow: 'visible' }}>
+        {/* guide / construction lines (dashed, fade in) */}
+        <g className="mdn-constr-g" fill="none" stroke="rgba(244,241,234,0.34)" strokeWidth="1" strokeDasharray="4 4">
+          <line className="pg" x1="32" y1="278" x2="420" y2="278" />            {/* ground line */}
+          <line className="pg" x1="248" y1="44" x2="248" y2="252" />            {/* altitude */}
+          <line className="pg" x1="108" y1="252" x2="388" y2="252" />          {/* base centre line */}
+          <line className="pg" x1="108" y1="252" x2="316" y2="200" />          {/* base diagonal */}
+          <line className="pg" x1="180" y1="200" x2="388" y2="252" />          {/* base diagonal */}
+          <line className="pg" x1="248" y1="44" x2="180" y2="200" />          {/* hidden back edge */}
+        </g>
+        {/* primary structural edges (solid, draw on) */}
+        <g className="mdn-constr-s" fill="none" stroke="rgba(244,241,234,0.82)" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
+          <line className="pl" x1="108" y1="252" x2="316" y2="200" />          {/* base front-left */}
+          <line className="pl" x1="316" y1="200" x2="388" y2="252" />          {/* base right */}
+          <line className="pl" x1="248" y1="44" x2="108" y2="252" />          {/* edge → left */}
+          <line className="pl" x1="248" y1="44" x2="388" y2="252" />          {/* edge → right */}
+          <line className="pl" x1="248" y1="44" x2="316" y2="200" />          {/* edge → front */}
+        </g>
+        {/* apex node + measure ticks */}
+        <g className="mdn-constr-n" fill="none" stroke="rgba(244,241,234,0.6)" strokeWidth="1">
+          <circle className="pn" cx="248" cy="44" r="3.5" />
+          <line className="pn" x1="40" y1="44" x2="40" y2="252" />            {/* height witness */}
+          <line className="pn" x1="34" y1="44" x2="46" y2="44" />
+          <line className="pn" x1="34" y1="252" x2="46" y2="252" />
+        </g>
+      </svg>
 
       {/* scroll cue */}
       <div className="mdn-cue" style={{ position: 'absolute', left: '50%', bottom: 22, transform: 'translateX(-50%)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, opacity: 0, zIndex: 4 }}>

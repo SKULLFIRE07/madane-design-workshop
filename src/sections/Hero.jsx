@@ -35,12 +35,36 @@ export function Hero({ started = false }) {
   useLayoutEffect(() => {
     if (!started) return
     const ctx = gsap.context(() => {
+      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      const bharat = root.current.querySelector('.hero__bharat')
+      // each akshara (भा · र · त) is its own cluster, inked in writing order
+      const aksharas = bharat ? bharat.querySelectorAll('.bch') : []
+
+      // भारत starts blank; clusters are written one after another, left→right,
+      // each revealed by an ink wipe across the glyph. Pure GSAP.
+      if (aksharas.length) {
+        gsap.set(aksharas, {
+          clipPath: 'inset(-14% 102% -14% -8%)', // fully clipped from the right = blank
+          opacity: 1,
+        })
+      }
+
       const tl = gsap.timeline({ delay: 0.1 })
       tl.from('.hero__eyebrow', { y: 30, opacity: 0, duration: 1, ease: 'expo.out' })
-        .from('.hero__line .ln', { yPercent: 120, opacity: 0, stagger: 0.09, duration: 1.15, ease: 'expo.out' }, '-=0.7')
+        // slide every line EXCEPT भारत (it gets its own write-on below)
+        .from('.hero__line .ln:not(.hero__bharat)', { yPercent: 120, opacity: 0, stagger: 0.09, duration: 1.15, ease: 'expo.out' }, '-=0.7')
         .from('.hero__rally', { opacity: 0, letterSpacing: '0.8em', duration: 1.3, ease: 'expo.out' }, '-=0.8')
         .from('.hero__sub, .hero__cta', { y: 26, opacity: 0, stagger: 0.12, duration: 1, ease: 'expo.out' }, '-=0.9')
         .from('.hero__strap', { opacity: 0, duration: 1 }, '-=1')
+
+      if (aksharas.length) {
+        tl.to(aksharas, {
+          clipPath: 'inset(-14% -8% -14% -8%)', // ink each cluster fully open
+          duration: 0.34,
+          ease: 'power3.out',
+          stagger: 0.12,                          // भा → र → त, in writing order
+        }, '-=1.0')
+      }
     }, root)
     return () => ctx.revert()
   }, [started])
@@ -96,7 +120,7 @@ export function Hero({ started = false }) {
 
         <h1 className="hero__headline" ref={headline}>
           <span className="hero__line"><span className="ln">we design</span></span>
-          <span className="hero__line"><span className="ln">&amp; build</span> <span className="ln hero__bharat" lang="hi">भारत</span></span>
+          <span className="hero__line"><span className="ln">&amp; build</span> <span className="ln hero__bharat" lang="hi" aria-label="भारत"><span className="bch" aria-hidden="true">भा</span><span className="bch" aria-hidden="true">र</span><span className="bch" aria-hidden="true">त</span></span></span>
         </h1>
 
         <div className="hero__rally">think to innovate</div>

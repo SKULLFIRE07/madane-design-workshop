@@ -1,0 +1,37 @@
+/* =======================================================================
+   ArchGrid · site-wide architectural blueprint veil
+   Fixed, pointer-transparent, very light. Sits above opaque section
+   backgrounds (so it's visible everywhere) but below the nav / cursor /
+   progress chrome, and never intercepts pointer events. GSAP drifts the
+   layers on scroll (see ArchGrid.jsx).
+   ======================================================================= */
+.arch {
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  overflow: hidden;
+  opacity: 0;                 /* GSAP fades in */
+  color: rgba(255, 255, 255, 0.05);   /* stroke colour for all svg line work */
+  mix-blend-mode: screen;     /* lines only ever lighten — disappear over white */
+}
+
+/* layers extend past the viewport so parallax never reveals an edge */
+.arch__layer {
+  position: absolute;
+  inset: -18%;
+  width: 136%;
+  height: 136%;
+  will-change: transform;
+}
+
+.arch__svg { display: block; }
+
+/* a touch fainter on small screens (lines get dense relative to width) */
+@media (max-width: 760px) {
+  .arch { color: rgba(255, 255, 255, 0.04); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .arch__layer { will-change: auto; }
+}

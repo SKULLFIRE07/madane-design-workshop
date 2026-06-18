@@ -4,6 +4,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { useSmoothScroll } from './hooks/useSmoothScroll'
 import HeroIntro from './components/HeroIntro'
 import { Nav } from './components/Nav'
+import { ArchGrid } from './components/ArchGrid'
 import { ScrollProgress } from './components/ScrollProgress'
 import { Hero } from './sections/Hero'
 import { Manifesto } from './sections/Manifesto'
@@ -31,6 +32,7 @@ import './styles/manifesto.css'
 import './styles/edge.css'
 import './styles/philosophy.css'
 import './styles/scatter.css'
+import './styles/arch.css'
 
 export default function App() {
   const [loaded, setLoaded] = useState(false)
@@ -63,6 +65,7 @@ export default function App() {
   return (
     <>
       <HeroIntro onComplete={onComplete} />
+      <ArchGrid />
       <ScrollProgress />
       <Nav />
       <main className={loaded ? 'is-ready' : ''}>
