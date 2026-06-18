@@ -289,7 +289,7 @@ export default function ProjectsGallery({ onOpen }) {
         </button>
         <div className="pg__caption-meta">
           <span className="pg__caption-idx">{pad(active + 1)}</span>
-          <span className="pg__caption-sep" aria-hidden="true">—</span>
+          <span className="pg__caption-sep" aria-hidden="true">·</span>
           <span className="pg__caption-loc">{activeProject?.location}</span>
         </div>
       </div>

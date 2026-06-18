@@ -21,7 +21,7 @@ const HEADLINE = [
 const LEDE = 'One studio. The whole build.'
 
 const BODY =
-  'Madane designs and builds high-performance, sustainable commercial workplaces across Bharat — end to end, from the first line to the final handover.'
+  'Madane designs and builds high-performance, sustainable commercial workplaces across Bharat, end to end, from the first line to the final handover.'
 
 /* small editorial spec line, derived from brand data (no colour, mono) */
 const SPEC = [

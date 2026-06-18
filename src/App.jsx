@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect } from 'react'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { useSmoothScroll } from './hooks/useSmoothScroll'
-import LogoReveal from './components/LogoReveal'
+import HeroIntro from './components/HeroIntro'
 import { Nav } from './components/Nav'
 import { ScrollProgress } from './components/ScrollProgress'
 import { Hero } from './sections/Hero'
@@ -62,7 +62,7 @@ export default function App() {
 
   return (
     <>
-      <LogoReveal onComplete={onComplete} />
+      <HeroIntro onComplete={onComplete} />
       <ScrollProgress />
       <Nav />
       <main className={loaded ? 'is-ready' : ''}>

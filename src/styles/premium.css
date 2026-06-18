@@ -1,273 +1,8 @@
-/* ===== PREMIUM COMPONENTS (agent-built, integrated) ===== */
+﻿/* ===== PREMIUM COMPONENTS (agent-built, integrated) ===== */
 /* ============================================================
-   LogoReveal · cinematic monochrome logo-led title sequence.
-   No loading numbers. The brush mark is the hero of the moment.
-   CSS + GSAP transforms/opacity only — 60fps, strictly black/white/grey.
-   ============================================================ */
-.lr {
-  position: fixed;
-  inset: 0;
-  z-index: 9999;
-  background: #050505;
-  color: #fff;
-  overflow: hidden;
-  clip-path: inset(0 0 0 0);
-  will-change: clip-path;
-  -webkit-user-select: none;
-  user-select: none;
-}
-
-/* subtle static film grain (monochrome, no glitter) */
-.lr__grain {
-  position: absolute;
-  inset: -50%;
-  pointer-events: none;
-  opacity: 0.04;
-  background-image: repeating-radial-gradient(
-    rgba(255, 255, 255, 0.5) 0 0.5px,
-    transparent 0.5px 100%
-  );
-  background-size: 3px 3px;
-  mix-blend-mode: screen;
-}
-
-/* ---- faint masked blueprint atmosphere ----------------------------- */
-.lr__bg {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  /* radial mask so the field fades to pure black at the edges */
-  -webkit-mask-image: radial-gradient(120% 120% at 50% 50%, #000 0%, #000 38%, transparent 78%);
-  mask-image: radial-gradient(120% 120% at 50% 50%, #000 0%, #000 38%, transparent 78%);
-}
-
-/* drifting blueprint grid */
-.lr__grid {
-  position: absolute;
-  inset: -25%;
-  opacity: 0.5;
-  background-image:
-    linear-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.045) 1px, transparent 1px);
-  background-size: 56px 56px;
-  animation: lrGridDrift 22s linear infinite;
-  will-change: transform;
-}
-
-@keyframes lrGridDrift {
-  from { transform: translate3d(0, 0, 0); }
-  to   { transform: translate3d(-56px, -56px, 0); }
-}
-
-/* concentric rings behind the mark */
-.lr__rings {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-}
-
-.lr__ring {
-  position: absolute;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 50%;
-  will-change: transform, opacity;
-}
-
-.lr__ring:nth-child(1) { width: 34vmin; height: 34vmin; }
-.lr__ring:nth-child(2) { width: 58vmin; height: 58vmin; border-color: rgba(255, 255, 255, 0.055); }
-.lr__ring:nth-child(3) { width: 86vmin; height: 86vmin; border-color: rgba(255, 255, 255, 0.035); }
-
-.lr__stage {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: clamp(20px, 3.4vh, 40px);
-}
-
-/* ---- the mark ------------------------------------------------------ */
-.lr__mark {
-  position: relative;
-  width: clamp(240px, 34vw, 460px);
-  aspect-ratio: 16 / 11;
-  will-change: transform, opacity;
-  transform: translateZ(0);
-}
-
-/* the vector mark that draws itself on (ring clockwise, then 'm' L→R) */
-.lr__svg {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  display: block;
-  pointer-events: none;
-  overflow: visible;
-  will-change: transform, opacity;
-}
-
-/* the draw-on paths — only stroke-dashoffset/opacity are animated by GSAP.
-   stroke-dashoffset is NOT a compositable property, so will-change on it is
-   pure overhead (and the owner flagged idle will-change as a jank source) —
-   the .lr__svg layer above already carries will-change: transform, opacity. */
-
-/* the angle the brush "paint" has swept to (0deg = nothing, 360deg = whole
-   mark revealed). Registered so it animates as a real angle. */
-@property --paint {
-  syntax: '<angle>';
-  inherits: false;
-  initial-value: 360deg;
-}
-
-/* the authentic brush mark — revealed by a conic mask that sweeps CLOCKWISE
-   from 12 o'clock, so the real hand-painted strokes appear as if a brush is
-   drawing the circle around. The 'm' (knocked out of the disc) emerges with it. */
-.lr__brush {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  display: block;
-  pointer-events: none;
-  will-change: transform, opacity;
-  -webkit-mask-image: conic-gradient(from -90deg, #000 0deg, #000 var(--paint, 360deg), transparent var(--paint, 360deg));
-          mask-image: conic-gradient(from -90deg, #000 0deg, #000 var(--paint, 360deg), transparent var(--paint, 360deg));
-  -webkit-mask-repeat: no-repeat;
-          mask-repeat: no-repeat;
-}
-
-/* impact shockwave rings — burst out when the brush mark stamps in */
-.lr__shock {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 62%;
-  aspect-ratio: 1;
-  margin: 0;
-  border: 1.5px solid rgba(255, 255, 255, 0.55);
-  border-radius: 50%;
-  /* centring (xPercent/yPercent) + scale are owned by GSAP so its scale tween
-     doesn't clobber a CSS translate(); see LogoReveal timeline. */
-  opacity: 0;
-  pointer-events: none;
-  will-change: transform, opacity;
-}
-
-/* ---- kinetic wordmark ---------------------------------------------- */
-.lr__word {
-  font-family: var(--font-display);
-  font-weight: 400;
-  /* cap the optical size: at opsz ~144 (auto, for huge type) Fraunces' contrast
-     thins the 'e' crossbar to nothing and it reads as 'c'. opsz 60 keeps an
-     elegant high-contrast display look while preserving the crossbar. */
-  font-optical-sizing: auto;
-  font-variation-settings: 'opsz' 60;
-  font-size: clamp(46px, 8.5vw, 132px);
-  line-height: 1;
-  letter-spacing: -0.02em;
-  color: #f4f4f4;
-  /* overflow:hidden masks the char rise (chars travel ~1em from below); the
-     generous horizontal padding keeps the negative tracking from clipping the
-     last glyph's right terminal (was cropping the 'e' into a 'c'). */
-  overflow: hidden;
-  padding: 0.14em 0.34em;
-}
-
-.lr__word .char {
-  display: inline-block;
-  will-change: transform;
-}
-
-/* wordmark lockup: big "madane" + tracked "design workshop" beneath */
-.lr__wordmark {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: clamp(8px, 1.3vh, 18px);
-}
-.lr__wordsub {
-  font-family: var(--font-mono);
-  font-size: clamp(11px, 1.5vw, 17px);
-  letter-spacing: 0.46em;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.62);
-  padding-left: 0.46em;
-  will-change: transform, opacity;
-}
-
-/* ---- disciplines line --------------------------------------------- */
-.lr__tag {
-  overflow: hidden;
-  font-family: var(--font-mono);
-  font-size: clamp(10px, 1.05vw, 13px);
-  letter-spacing: 0.42em;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.5);
-  padding-left: 0.42em;
-}
-
-.lr__tag-i {
-  display: inline-block;
-  will-change: transform;
-}
-
-/* ---- the only progress hint: an ultra-thin hairline (no digits) ---- */
-.lr__bar {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 1px;
-  background: rgba(255, 255, 255, 0.08);
-  overflow: hidden;
-}
-
-.lr__bar-fill {
-  display: block;
-  width: 100%;
-  height: 100%;
-  background: #f4f4f4;
-  transform: scaleX(0);
-  transform-origin: left center;
-  will-change: transform;
-}
-
-/* ---- corner brand stamp (est.2008) -------------------------------- */
-.lr__corner {
-  position: absolute;
-  left: clamp(20px, 4vw, 56px);
-  bottom: clamp(24px, 4vw, 54px);
-  font-family: var(--font-mono);
-  font-size: clamp(9px, 0.85vw, 11px);
-  letter-spacing: 0.34em;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.4);
-  will-change: transform, opacity;
-}
-
-/* ---- mobile degrade ----------------------------------------------- */
-@media (max-width: 860px) {
-  .lr__mark { width: clamp(200px, 64vw, 320px); }
-  .lr__word { font-size: clamp(44px, 16vw, 84px); }
-  .lr__corner { font-size: 9px; letter-spacing: 0.26em; bottom: 26px; }
-  .lr__tag { letter-spacing: 0.3em; }
-  .lr__grain { display: none; }       /* lighten paint on mobile */
-  .lr__grid { animation: none; }       /* no idle repaint on mobile */
-  .lr__ring:nth-child(3) { display: none; }
-}
-
-/* ---- reduced motion: static, no overlay artefacts ----------------- */
-@media (prefers-reduced-motion: reduce) {
-  .lr { display: none; }
-}
-/* ============================================================
-   ProjectsGallery · pinned horizontal "zoom-then-slide" gallery
+   ProjectsGallery Â· pinned horizontal "zoom-then-slide" gallery
    Centre card zooms to a hero plate in full colour; neighbours
-   shrink, lift and desaturate. Pure monochrome chrome — the
+   shrink, lift and desaturate. Pure monochrome chrome â€” the
    project PHOTOS are the only colour.
    ============================================================ */
 
@@ -377,7 +112,7 @@
   height: 100%;
   object-fit: cover;
   display: block;
-  /* gentle parallax breathing — centre eases to 1, neighbours sit at 1.05 */
+  /* gentle parallax breathing â€” centre eases to 1, neighbours sit at 1.05 */
   transform: scale(calc(1 + var(--g) * 0.05));
   transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -469,7 +204,7 @@
 .pg__arrow svg { width: 38%; height: 38%; }
 
 /* ============================================================
-   MOBILE (<861px): no pin, no horizontal · vertical full-bleed plates
+   MOBILE (<861px): no pin, no horizontal Â· vertical full-bleed plates
    ============================================================ */
 @media (max-width: 860px) {
   .pg {
@@ -548,7 +283,7 @@
   .pg__arrow { transition: none; }
 }
 /* ============================================================
-   PHILOSOPHY REVEAL — pinned editorial beat.
+   PHILOSOPHY REVEAL â€” pinned editorial beat.
    Image left (~55%) parallax + scale settle; text right with
    descender-safe word line-masks (translateY reveal ONLY).
    ============================================================ */
@@ -672,7 +407,7 @@
 .pr__word {
   display: inline-block;
   will-change: transform;
-  /* reveal is translateY only — never clip-path */
+  /* reveal is translateY only â€” never clip-path */
   transform: translateY(100%);
 }
 
