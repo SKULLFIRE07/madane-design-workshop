@@ -118,6 +118,20 @@ export function Edge() {
     return () => ctx.revert()
   }, [])
 
+  // premium header reveal on enter (fires before the pin engages)
+  useLayoutEffect(() => {
+    const el = root.current
+    if (!el) return
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    const ctx = gsap.context(() => {
+      const tl = gsap.timeline({ scrollTrigger: { trigger: '.edge__inner', start: 'top 82%', once: true } })
+      tl.from('.edge__aside .eyebrow', { yPercent: 110, opacity: 0, duration: 0.7, ease: 'expo.out' })
+        .from('.edge__lede', { y: 24, opacity: 0, duration: 0.9, ease: 'expo.out' }, '-=0.4')
+        .from('.edge__index', { y: 20, opacity: 0, duration: 0.8, ease: 'expo.out' }, '-=0.55')
+    }, root)
+    return () => ctx.revert()
+  }, [])
+
   return (
     <section id="edge" className="edge" ref={root}>
       <div className="edge__sticky grain">

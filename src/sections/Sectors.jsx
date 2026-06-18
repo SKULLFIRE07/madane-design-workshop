@@ -149,6 +149,19 @@ export function Sectors() {
     prevActive.current = active
   }, [active])
 
+  // premium header reveal on enter (fires before the pin engages)
+  useLayoutEffect(() => {
+    const el = root.current
+    if (!el) return
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    const ctx = gsap.context(() => {
+      const tl = gsap.timeline({ scrollTrigger: { trigger: '.sx__head', start: 'top 84%', once: true } })
+      tl.from('.sx__head .eyebrow', { yPercent: 110, opacity: 0, duration: 0.7, ease: 'expo.out' })
+        .from('.sx__through', { y: 18, opacity: 0, duration: 0.9, ease: 'expo.out' }, '-=0.4')
+    }, root)
+    return () => ctx.revert()
+  }, [])
+
   return (
     <section id="sectors" className="sx" ref={root}>
       <div className="sx__sticky">
