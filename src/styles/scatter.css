@@ -322,7 +322,7 @@
 }
 
 /* note A: nudged inward + down so it clears the edge and the hint row */
-.sw-orn__note--a { top: clamp(11rem, 23vh, 17rem); right: clamp(15%, 22vw, 26%); }
+.sw-orn__note--a { top: 64%; left: 69%; right: auto; }
 .sw-orn__arrow {
   width: clamp(64px, 7vw, 104px);
   height: auto;
@@ -357,7 +357,7 @@
 .sw-orn__spark--2 { bottom: 18%; right: 7%; transform: rotate(18deg); }
 
 @media (max-width: 640px) {
-  .sw-orn__note--a { right: 14%; top: 13rem; }
+  .sw-orn__note--a { left: 8%; right: auto; top: 12rem; }
   .sw-orn__spark--1 { left: 8%; }
 }
 
