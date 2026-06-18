@@ -1,0 +1,41 @@
+/* ============================================================
+   HeroIntro · cinematic viewfinder → ink-bleed → brush-drawn logo
+   (ported from the Claude Design HeroIntro prototype)
+   ============================================================ */
+
+@keyframes mdn-grain {
+  0%   { transform: translate(0, 0); }
+  10%  { transform: translate(-4%, -5%); }
+  20%  { transform: translate(-9%, 4%); }
+  30%  { transform: translate(5%, -9%); }
+  40%  { transform: translate(-4%, 13%); }
+  50%  { transform: translate(-9%, 5%); }
+  60%  { transform: translate(13%, 0); }
+  70%  { transform: translate(0, 9%); }
+  80%  { transform: translate(-13%, 0); }
+  90%  { transform: translate(9%, 4%); }
+  100% { transform: translate(0, 0); }
+}
+@keyframes mdn-drop {
+  0%   { transform: translateY(-110%); opacity: 0; }
+  15%  { opacity: 1; }
+  85%  { opacity: 1; }
+  100% { transform: translateY(110%); opacity: 0; }
+}
+
+.mdn-grain { animation: mdn-grain 8s steps(10) infinite; }
+.mdn-drop  { animation: mdn-drop 1.9s cubic-bezier(0.65, 0, 0.35, 1) infinite; }
+
+.mdn-skip:hover,
+.mdn-skip:focus-visible { color: rgba(244, 241, 234, 0.9) !important; }
+.mdn-skip:focus-visible { outline: 1px solid rgba(244, 241, 234, 0.5); outline-offset: 2px; }
+
+/* mobile: drop the GPU-heavy animated grain */
+@media (max-width: 760px) {
+  .mdn-grain { display: none; }
+}
+
+/* reduced motion: no idle grain drift */
+@media (prefers-reduced-motion: reduce) {
+  .mdn-grain, .mdn-drop { animation: none; }
+}

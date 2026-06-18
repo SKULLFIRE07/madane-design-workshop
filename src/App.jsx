@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect } from 'react'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { useSmoothScroll } from './hooks/useSmoothScroll'
-import LogoReveal from './components/LogoReveal'
+import HeroIntro from './components/HeroIntro'
 import { Nav } from './components/Nav'
 import { ScrollProgress } from './components/ScrollProgress'
 import { Hero } from './sections/Hero'
@@ -12,7 +12,6 @@ import { Stats } from './sections/Stats'
 import { Capabilities } from './sections/Capabilities'
 import { Edge } from './sections/Edge'
 import { Sectors } from './sections/Sectors'
-import ProjectsGallery from './sections/ProjectsGallery'
 import { Works } from './sections/Works'
 import { Growth } from './sections/Growth'
 import { WhyMadane } from './sections/WhyMadane'
@@ -31,6 +30,7 @@ import './styles/gallery.css'
 import './styles/manifesto.css'
 import './styles/edge.css'
 import './styles/philosophy.css'
+import './styles/scatter.css'
 
 export default function App() {
   const [loaded, setLoaded] = useState(false)
@@ -62,7 +62,7 @@ export default function App() {
 
   return (
     <>
-      <LogoReveal onComplete={onComplete} />
+      <HeroIntro onComplete={onComplete} />
       <ScrollProgress />
       <Nav />
       <main className={loaded ? 'is-ready' : ''}>
@@ -73,7 +73,6 @@ export default function App() {
         <Capabilities />
         <Edge />
         <Sectors />
-        <ProjectsGallery onOpen={setActive} />
         <Works onOpen={setActive} />
         <Growth />
         <WhyMadane />

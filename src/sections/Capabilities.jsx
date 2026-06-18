@@ -133,6 +133,19 @@ export function Capabilities() {
     return () => ctx.revert()
   }, [])
 
+  // premium header reveal on enter (fires before the horizontal pin engages)
+  useLayoutEffect(() => {
+    const el = root.current
+    if (!el) return
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    const ctx = gsap.context(() => {
+      const tl = gsap.timeline({ scrollTrigger: { trigger: '.cap__head', start: 'top 84%', once: true } })
+      tl.from('.cap__head .eyebrow', { yPercent: 110, opacity: 0, duration: 0.7, ease: 'expo.out' })
+        .from('.cap__title', { yPercent: 60, opacity: 0, duration: 1.05, ease: 'expo.out' }, '-=0.45')
+    }, root)
+    return () => ctx.revert()
+  }, [])
+
   return (
     <section id="capabilities" className="cap" ref={root}>
       <div className="cap__sticky">

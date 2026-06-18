@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(Start-Process \"http://localhost:5174/\")",
+      "Bash(node _chk.mjs)"
+    ]
+  }
+}

@@ -17,10 +17,10 @@ export function useSmoothScroll() {
     if (reduce) return
 
     const lenis = new Lenis({
-      duration: 1.15,
+      duration: 0.9,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       smoothWheel: true,
-      wheelMultiplier: 1,
+      wheelMultiplier: 1.15,
       touchMultiplier: 1.6,
     })
 
@@ -35,28 +35,25 @@ export function useSmoothScroll() {
     // expose for anchor scrolling
     window.__lenis = lenis
 
-    // ── SOFT STOP at every section boundary ────────────────────────────────
-    // Proximity snap: when scrolling comes to rest near a section top, it gently
-    // settles onto it. It engages within a distance window + after a debounce, so
-    // it never traps scroll mid-section — important because several sections are
-    // pinned/scrubbed (Manifesto, Capabilities, Edge, Sectors, ProjectsGallery)
-    // and must stay freely scrollable through their long pins.
+    // ── GENTLE STOP at the START of each section ───────────────────────────
+    // Proximity snap, section TOPS only: if a single scroll comes to rest just
+    // off a section top, it settles onto it (so the section/image starts clean).
+    // It only engages once scrolling has come to REST near a top — if you're
+    // actively scrolling (momentum in hand), it never fires. A tight window +
+    // velocity guard keep it from grabbing during a real scroll.
     const snap = new Snap(lenis, {
       type: 'proximity',
-      duration: 0.9,
+      duration: 0.5,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-      // catch window is wide enough that the densely-stacked lower sections
-      // (Growth, Why, Studio, Clients) reliably settle, not just the tall ones.
-      distanceThreshold: '50%',
-      debounce: 450,
+      // only catch when the rest position is genuinely close to a top
+      distanceThreshold: '18%',
+      // don't snap while still moving with speed — only after it settles
+      velocityThreshold: 1,
+      debounce: 220,
     })
 
-    // Targets are added as explicit numeric offsets rather than Lenis' auto-
-    // measured elements: ScrollTrigger inserts pin-spacers that resize <body>
-    // mid-scroll, which makes the library re-measure section tops at a transient
-    // layout and snap ~100px short. We recompute the offsets ourselves, only when
-    // the layout is settled (on every ScrollTrigger refresh). Pinned sections get
-    // wrapped in a .pin-spacer, so match those too.
+    // Targets are explicit numeric offsets (section tops), recomputed on every
+    // ScrollTrigger refresh so pin-spacers/font shifts don't leave them stale.
     const sectionEls = () =>
       Array.from(document.querySelectorAll('main > section, main > footer, main > .pin-spacer > section'))
     let removeSnaps = []
@@ -68,7 +65,6 @@ export function useSmoothScroll() {
     }
     buildSnaps()
 
-    // recompute targets after pins/fonts/resize shift the layout
     const onRefresh = () => buildSnaps()
     ScrollTrigger.addEventListener('refresh', onRefresh)
 

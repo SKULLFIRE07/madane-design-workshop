@@ -1,0 +1,302 @@
+/* =======================================================================
+   SELECTED WORKS · scattered-photo gallery
+   Photographs laid on a desk — rotated, shadowed, floating, alive on hover.
+   All motion is GSAP-driven (transform/opacity only). This file is layout,
+   surface, shadow and glow. Monochrome by default; faint per-project tone
+   glow on lift/focus. No grid, no masonry, no carousel.
+   ======================================================================= */
+
+/* lock the whole section to one screen: header on top, desk fills the rest */
+.sw {
+  background: var(--ink);
+  overflow: hidden;
+  height: 100vh;
+  min-height: 620px;
+  /* top pad clears the fixed nav so the title isn't cut */
+  padding-top: clamp(5.5rem, 11vh, 8rem);
+  padding-bottom: clamp(1.2rem, 3vh, 2rem);
+  display: flex;
+  flex-direction: column;
+}
+
+.sw-head {
+  flex: 0 0 auto;
+  border-bottom: none;
+  margin-bottom: clamp(0.8rem, 2vh, 1.6rem);
+  padding-bottom: 0;
+  align-items: flex-end;
+}
+.sw .works__title { font-size: clamp(2.2rem, 5.2vw, 4.4rem); }
+.sw-hint {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  color: var(--paper-faint);
+  text-transform: none;
+}
+
+/* ---- the desk — fills whatever height is left under the header ---- */
+.sw-stage {
+  position: relative;
+  width: 100%;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: visible;
+}
+
+/* dim layer revealed on focus — sits above scattered cards, below focal one */
+.sw-backdrop {
+  position: absolute;
+  inset: -10vh 0;
+  z-index: 700;
+  background: radial-gradient(120% 90% at 50% 45%, rgba(4, 4, 4, 0.55), rgba(4, 4, 4, 0.9));
+  backdrop-filter: blur(3px);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+.sw.is-focused .sw-backdrop { pointer-events: auto; }
+
+/* ---- a single photograph (outer = position only, set by GSAP) ---- */
+.sw-card {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  cursor: pointer;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.sw-card:focus-visible .sw-inner { outline: 2px solid #fff; outline-offset: 6px; }
+
+/* each nested layer owns ONE animated concern → GSAP transforms never collide */
+.sw-par,
+.sw-mag,
+.sw-float { display: block; will-change: transform; }
+
+.sw-inner {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1; /* overwritten inline per card */
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--ink-3);
+  will-change: transform;
+  transform-origin: center center;
+  /* resting shadow — a photo lying on a desk */
+  box-shadow:
+    0 2px 6px rgba(0, 0, 0, 0.45),
+    0 12px 30px rgba(0, 0, 0, 0.35);
+  transition: box-shadow 0.45s var(--ease-out);
+}
+
+.sw-photo {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  filter: grayscale(1) contrast(1.03) brightness(0.92);
+  transition: filter 0.6s var(--ease-out);
+  transform: scale(1.02); /* hide sub-pixel edges under rotation */
+}
+
+/* hairline frame + tiny caption */
+.sw-inner::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 1px solid var(--hairline-soft);
+  border-radius: var(--radius);
+  pointer-events: none;
+  transition: border-color 0.4s var(--ease-out);
+}
+.sw-tag {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  padding: 1.4rem 0.85rem 0.7rem;
+  background: linear-gradient(180deg, transparent, rgba(4, 4, 4, 0.82));
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.4s var(--ease-out), transform 0.4s var(--ease-out);
+  pointer-events: none;
+}
+.sw-tag__name {
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 0.78rem;
+  color: #fff;
+}
+.sw-tag__loc {
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.08em;
+  color: var(--paper-dim);
+}
+
+/* ---- lift on hover: deeper shadow + soft white core glow + faint tone halo ---- */
+.sw-card.is-hot .sw-inner,
+.sw-card.is-focus .sw-inner {
+  box-shadow:
+    0 6px 16px rgba(0, 0, 0, 0.5),
+    0 26px 60px rgba(0, 0, 0, 0.55),
+    0 0 0 1px rgba(255, 255, 255, 0.14),
+    0 0 38px rgba(255, 255, 255, 0.1),
+    0 0 70px var(--tone, transparent);
+}
+.sw-card.is-hot .sw-photo,
+.sw-card.is-focus .sw-photo { filter: grayscale(0) contrast(1.05) brightness(1); }
+.sw-card.is-hot .sw-inner::after,
+.sw-card.is-focus .sw-inner::after { border-color: rgba(255, 255, 255, 0.22); }
+.sw-card.is-hot .sw-tag,
+.sw-card.is-focus .sw-tag { opacity: 1; transform: translateY(0); }
+
+/* focused photo gets a stronger ambient tone bloom */
+.sw-card.is-focus .sw-inner {
+  box-shadow:
+    0 10px 24px rgba(0, 0, 0, 0.55),
+    0 40px 90px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(255, 255, 255, 0.16),
+    0 0 60px rgba(255, 255, 255, 0.12),
+    0 0 120px var(--tone, transparent);
+}
+.sw-card.is-focus .sw-tag { display: none; }
+
+/* ---- close control ---- */
+.sw-close {
+  position: absolute;
+  top: 1.2rem;
+  right: clamp(1.2rem, 4vw, 3rem);
+  z-index: 1300;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  border: 1px solid var(--hairline);
+  background: rgba(8, 8, 8, 0.55);
+  backdrop-filter: blur(8px);
+  display: none;
+  place-items: center;
+  opacity: 0;
+  cursor: pointer;
+  transition: border-color 0.3s, background-color 0.3s;
+}
+.sw-close:hover { border-color: var(--paper-dim); background: rgba(8, 8, 8, 0.8); }
+.sw-close span {
+  position: absolute;
+  width: 16px;
+  height: 1.5px;
+  background: #fff;
+}
+.sw-close span:first-child { transform: rotate(45deg); }
+.sw-close span:last-child { transform: rotate(-45deg); }
+
+/* ---- project dossier (revealed on focus) ---- */
+.sw-detail {
+  position: absolute;
+  z-index: 1150;
+  display: none;
+  flex-direction: column;
+  gap: 0.9rem;
+  opacity: 0;
+  pointer-events: none;
+  /* mobile/tablet default: bottom sheet */
+  left: 50%;
+  bottom: clamp(1.5rem, 5vh, 3rem);
+  transform: translateX(-50%);
+  width: min(560px, 88%);
+  padding: clamp(1.4rem, 3vw, 2rem);
+  background: rgba(10, 10, 10, 0.72);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius);
+  backdrop-filter: blur(14px);
+}
+.sw.is-focused .sw-detail { pointer-events: auto; }
+
+/* desktop: dossier docked to the right, photo centres left */
+.sw-stage--side .sw-detail {
+  left: auto;
+  right: clamp(2rem, 5vw, 5rem);
+  bottom: auto;
+  top: 50%;
+  transform: translateY(-50%);
+  width: min(420px, 34%);
+  background: transparent;
+  border: none;
+  backdrop-filter: none;
+  padding: 0;
+}
+
+.sw-detail__cat {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--paper-dim);
+}
+.sw-detail__title {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(2rem, 3.4vw, 3.2rem);
+  line-height: 1.02;
+  letter-spacing: -0.018em;
+  color: #fff;
+}
+.sw-detail__desc {
+  font-family: var(--font-sans);
+  font-size: clamp(0.95rem, 1.2vw, 1.08rem);
+  line-height: 1.6;
+  color: var(--paper-dim);
+  max-width: 42ch;
+}
+.sw-detail__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.2rem;
+}
+.sw-detail__chip {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.04em;
+  color: var(--paper-dim);
+  padding: 0.4rem 0.7rem;
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius);
+}
+.sw-detail__btn {
+  align-self: flex-start;
+  margin-top: 0.6rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink);
+  background: var(--paper);
+  border: 1px solid var(--paper);
+  border-radius: var(--radius);
+  padding: 0.8rem 1.3rem;
+  cursor: pointer;
+  transition: background-color 0.3s, color 0.3s, transform 0.3s var(--ease-out);
+}
+.sw-detail__btn span { transition: transform 0.3s var(--ease-out); }
+.sw-detail__btn:hover { background: transparent; color: var(--paper); }
+.sw-detail__btn:hover span { transform: translateX(5px); }
+
+/* ---- reduced motion / no-pointer: keep it static & legible ---- */
+@media (prefers-reduced-motion: reduce) {
+  .sw-inner { transition: none; }
+}
+
+@media (max-width: 640px) {
+  /* phones: let it breathe vertically instead of cramming one screen */
+  .sw { height: auto; min-height: 100vh; }
+  .sw-stage { flex: 0 0 auto; height: clamp(1100px, 220vh, 2200px); }
+  .sw-hint { display: none; }
+}
