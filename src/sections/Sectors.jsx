@@ -206,7 +206,7 @@ export function Sectors() {
             </div>
             <span className="sx__slate" aria-hidden>
               <span className="sx__slate-i">{pad2(active + 1)}</span>
-              <span className="sx__slate-sep">—</span>
+              <span className="sx__slate-sep">/</span>
               <span className="sx__slate-n">{pad2(N)}</span>
             </span>
           </div>

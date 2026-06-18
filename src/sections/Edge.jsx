@@ -142,11 +142,11 @@ export function Edge() {
           <aside className="edge__aside">
             <span className="eyebrow">the mdw edge</span>
             <p className="edge__lede">
-              one platform — site-search to facility lifecycle. a single line
+              one platform: site-search to facility lifecycle. a single line
               of accountability across every decision.
             </p>
 
-            <nav className="edge__index" aria-label="the mdw edge — six stages">
+            <nav className="edge__index" aria-label="the mdw edge, six stages">
               <span className="edge__rail" aria-hidden>
                 <span className="edge__rail-fill" ref={lineRef} />
               </span>
