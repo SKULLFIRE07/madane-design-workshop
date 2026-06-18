@@ -30,6 +30,7 @@ import './styles/gallery.css'
 import './styles/manifesto.css'
 import './styles/edge.css'
 import './styles/philosophy.css'
+import './styles/scatter.css'
 
 export default function App() {
   const [loaded, setLoaded] = useState(false)
