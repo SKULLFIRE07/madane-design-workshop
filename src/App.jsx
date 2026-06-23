@@ -33,6 +33,7 @@ import './styles/edge.css'
 import './styles/philosophy.css'
 import './styles/scatter.css'
 import './styles/arch.css'
+import './styles/responsive.css'
 
 export default function App() {
   const [loaded, setLoaded] = useState(false)

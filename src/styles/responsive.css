@@ -1,0 +1,41 @@
+/* ============================================================
+   responsive.css — final mobile/tablet hardening pass.
+   Loaded LAST so it tops the cascade. The codebase already
+   stacks most sections at 859/860px; this file only closes the
+   concrete gaps the audit surfaced and adds small-phone safety.
+   Breakpoints: 900 (tablet) · 600 (phone) · 400 (small phone).
+   ============================================================ */
+
+/* belt-and-braces against any off-screen absolute bleeding the
+   page wider than the viewport (body already clips, root too) */
+#root { overflow-x: clip; }
+svg, canvas, video { max-width: 100%; }
+
+/* ---------- PHONE ≤600px ---------- */
+@media (max-width: 600px) {
+  /* growth/stats charts: the reserved right gutter for the end
+     callout squeezes the plot on phones — give it the full width */
+  .gchart__canvas { inset: 0 !important; }
+
+  /* contact footer line: three mono items read better stacked than
+     spread edge-to-edge with space-between */
+  .contact__copyline { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+
+  /* India map shouldn't dominate the stats column on a phone */
+  .indiamap { max-width: 300px; }
+
+  /* studio partner logos: 1-col already at 820px — tighten gap */
+  .studio__partners { gap: 1.4rem; }
+}
+
+/* ---------- SMALL PHONE ≤400px ---------- */
+@media (max-width: 400px) {
+  /* oversized display type — pull the clamp floors down so nothing
+     overruns a 360/375px viewport */
+  .pg__card-name { font-size: clamp(24px, 8vw, 36px); }
+  .pg__caption-name { font-size: clamp(26px, 9vw, 48px); }
+  .edge__chapter-name { font-size: clamp(1.7rem, 13vw, 2.6rem); }
+
+  /* watermark gets out of the headline's way on the narrowest screens */
+  .hero__watermark { opacity: 0.03; }
+}
