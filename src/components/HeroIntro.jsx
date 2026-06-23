@@ -175,7 +175,7 @@ export default function HeroIntro({ onComplete, speed = 1.3 }) {
       if (tl) tl.kill()
       if (breath) breath.kill()
 
-      const constr = q('.mdn-constr')
+      const constr = q('.mdn-constr-wrap')   // transform/opacity target (div → predictable origin)
       const plines = qa('.mdn-constr .pl')
       const glines = qa('.mdn-constr .pg')
       const nlines = qa('.mdn-constr .pn')
@@ -216,6 +216,20 @@ export default function HeroIntro({ onComplete, speed = 1.3 }) {
       const wrapRect = wrap ? wrap.getBoundingClientRect() : { top: fullH * 0.2, height: fullH * 0.6, width: fullW * 0.3 }
       const Wc = Math.min(fullW - 40, wrapRect.width + 96)   // converged frame hugs the lockup
       const Hc = Math.min(fullH - 40, wrapRect.height + 72)
+
+      // morph target: align the construction circle onto the logo disc's white
+      // circle (measured at 53%/42.5% of the asset, r = 37% of its width)
+      const constrW = Math.min(460, fullH * 0.62)            // matches CSS width
+      const constrCircleR = (112 / 452) * constrW            // displayed radius of the pl circle
+      const discCx = wrapRect.left + 0.530 * wrapRect.width
+      const discCy = wrapRect.top + 0.425 * wrapRect.height
+      const discR = 0.370 * wrapRect.width
+      const morphScale = discR / constrCircleR
+      // shift the whole lockup so its disc circle sits at the viewport centre…
+      const lockup = q('.mdn-lockup')
+      if (lockup) g.set(lockup, { x: fullW / 2 - discCx, y: fullH / 2 - discCy })
+      // …and build the sphere at that same centre → spin + morph in place
+      if (constr) g.set(constr, { left: fullW / 2, top: fullH / 2, xPercent: -50, yPercent: -50 })
 
       if (datum) g.set(datum, { scaleX: 0, opacity: 0.5 })
       if (vdatum) g.set(vdatum, { scaleY: 0, opacity: 0.4 })
@@ -276,18 +290,43 @@ export default function HeroIntro({ onComplete, speed = 1.3 }) {
         if (nlines.length) t.to(nlines, { opacity: 1, duration: 0.45, ease: 'power2.out', stagger: 0.06 }, 1.1)
       }
 
-      // 3. CONVERGE
-      const CV = 1.6
+      // 2b. SPIN — the sphere drifts up and tumbles once, then settles centred
+      const meridian = glines[3] // vertical ring (h-axis, v-axis, equator, meridian) → fake 3D turn
+      if (constr) {
+        t.set(constr, { transformOrigin: '50% 50%' }, 0)
+        t.to(constr, {
+          keyframes: [
+            { y: -26, rotation: 150, duration: 0.75, ease: 'power1.inOut' },
+            { y: 0, rotation: 360, duration: 0.85, ease: 'power2.inOut' },
+          ],
+        }, 1.55)
+        // meridian squashes through edge-on → reads like the globe rotating
+        if (meridian) t.to(meridian, { attr: { rx: 0 }, duration: 0.8, ease: 'sine.inOut', yoyo: true, repeat: 1 }, 1.55)
+      }
+
+      // 3. CONVERGE — collapse the guides/dimensions, keep the solid sphere circle
+      const CV = 3.0
       if (gridLines.length) t.to(gridLines, { opacity: 0, duration: 0.55, ease: 'power2.in' }, CV)
-      if (constr) t.to(constr, { opacity: 0, duration: 0.55, ease: 'power2.in' }, CV)
+      if (glines.length) t.to(glines, { opacity: 0, duration: 0.5, ease: 'power2.in', stagger: 0.03 }, CV)
+      if (nlines.length) t.to(nlines, { opacity: 0, duration: 0.5, ease: 'power2.in' }, CV)
       if (vdatum) t.to(vdatum, { scaleY: 0, opacity: 0, duration: 0.75, ease: 'power3.inOut' }, CV)
       if (datum) t.to(datum, { opacity: 0, duration: 0.6, ease: 'power2.in' }, CV)
       if (cornersWrap) t.to(cornersWrap, { width: Wc, height: Hc, duration: 0.95, ease: 'power3.inOut' }, CV)
       if (corners.length) t.to(corners, { width: 22, height: 22, duration: 0.95, ease: 'power3.inOut' }, CV)
 
-      const RS = 2.15
+      const RS = 3.5
 
-      // 4. ink-bleed disc reveal
+      // 3b. MORPH — the solid sphere circle grows to the disc's size and dissolves
+      //     exactly as the ink-bleed disc resolves in, so the wireframe *becomes*
+      //     the logo rather than cutting to it.
+      if (constr) {
+        t.set(constr, { transformOrigin: '50% 50%' }, 0)
+        // pure scale — the wireframe is already centred on the disc
+        t.to(constr, { scale: morphScale, duration: 1.4, ease: 'power3.inOut' }, RS - 0.15)
+        if (plines.length) t.to(plines, { opacity: 0, duration: 1.0, ease: 'power2.in' }, RS + 0.3)
+      }
+
+      // 4. ink-bleed disc reveal (rises out of the dissolving sphere circle)
       if (disp) t.to(disp, { attr: { scale: 0 }, duration: 1.5, ease: 'power3.out' }, RS)
       if (blur) t.to(blur, { attr: { stdDeviation: 0 }, duration: 1.4, ease: 'power3.out' }, RS)
       t.fromTo(wrap, { opacity: 0, scale: 1.1 }, { opacity: 1, scale: 1, duration: 1.5, ease: 'expo.out' }, RS)
@@ -398,7 +437,7 @@ export default function HeroIntro({ onComplete, speed = 1.3 }) {
       </div>
 
       {/* centered logo lockup */}
-      <div style={{ position: 'absolute', inset: 0, zIndex: 2, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+      <div className="mdn-lockup" style={{ position: 'absolute', inset: 0, zIndex: 2, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
         <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', width: 'min(356px, 56vh)', maxWidth: '80vw' }}>
           <div className="mdn-glow" style={{ position: 'absolute', left: '50%', top: '42%', transform: 'translate(-50%,-50%)', width: '84%', height: '60%', borderRadius: '50%', opacity: 0, background: 'radial-gradient(circle at 50% 50%, rgba(255,250,238,0.55) 0%, rgba(244,241,234,0.18) 34%, rgba(244,241,234,0.04) 58%, transparent 72%)', filter: 'blur(8px)', pointerEvents: 'none' }} />
 
@@ -434,33 +473,32 @@ export default function HeroIntro({ onComplete, speed = 1.3 }) {
       </div>
 
       {/* construction diagram — a pyramid drawn line by line (replaces counter) */}
+      <div className="mdn-constr-wrap"
+        style={{ position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%,-50%)', width: 'min(460px, 62vh)', zIndex: 6, opacity: 0 }}>
       <svg className="mdn-constr" viewBox="0 0 452 360" aria-hidden="true"
-        style={{ position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%,-50%)', width: 'min(460px, 62vh)', height: 'auto', zIndex: 6, opacity: 0, overflow: 'visible' }}>
-        {/* guide / construction lines (dashed, fade in) */}
+        style={{ display: 'block', width: '100%', height: 'auto', overflow: 'visible' }}>
+        {/* sphere construction — globe lat/long + axes (dashed guides, fade in) */}
         <g className="mdn-constr-g" fill="none" stroke="rgba(244,241,234,0.34)" strokeWidth="1" strokeDasharray="4 4">
-          <line className="pg" x1="32" y1="278" x2="420" y2="278" />            {/* ground line */}
-          <line className="pg" x1="248" y1="44" x2="248" y2="252" />            {/* altitude */}
-          <line className="pg" x1="108" y1="252" x2="388" y2="252" />          {/* base centre line */}
-          <line className="pg" x1="108" y1="252" x2="316" y2="200" />          {/* base diagonal */}
-          <line className="pg" x1="180" y1="200" x2="388" y2="252" />          {/* base diagonal */}
-          <line className="pg" x1="248" y1="44" x2="180" y2="200" />          {/* hidden back edge */}
+          <line className="pg" x1="92" y1="180" x2="360" y2="180" />                                  {/* horizontal axis */}
+          <line className="pg" x1="226" y1="46" x2="226" y2="314" />                                  {/* vertical axis */}
+          <ellipse className="pg" cx="226" cy="180" rx="112" ry="34" />                                {/* equator */}
+          <ellipse className="pg" cx="226" cy="180" rx="34" ry="112" />                                {/* meridian */}
         </g>
-        {/* primary structural edges (solid, draw on) */}
+        {/* primary outline (solid, draws on) — becomes the logo disc */}
         <g className="mdn-constr-s" fill="none" stroke="rgba(244,241,234,0.82)" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
-          <line className="pl" x1="108" y1="252" x2="316" y2="200" />          {/* base front-left */}
-          <line className="pl" x1="316" y1="200" x2="388" y2="252" />          {/* base right */}
-          <line className="pl" x1="248" y1="44" x2="108" y2="252" />          {/* edge → left */}
-          <line className="pl" x1="248" y1="44" x2="388" y2="252" />          {/* edge → right */}
-          <line className="pl" x1="248" y1="44" x2="316" y2="200" />          {/* edge → front */}
+          <circle className="pl" cx="226" cy="180" r="112" />
+          <ellipse className="pl" cx="226" cy="180" rx="112" ry="34" />                                {/* solid equator */}
         </g>
-        {/* apex node + measure ticks */}
+        {/* centre node + radius dimension (fade in) */}
         <g className="mdn-constr-n" fill="none" stroke="rgba(244,241,234,0.6)" strokeWidth="1">
-          <circle className="pn" cx="248" cy="44" r="3.5" />
-          <line className="pn" x1="40" y1="44" x2="40" y2="252" />            {/* height witness */}
-          <line className="pn" x1="34" y1="44" x2="46" y2="44" />
-          <line className="pn" x1="34" y1="252" x2="46" y2="252" />
+          <circle className="pn" cx="226" cy="180" r="3" fill="rgba(244,241,234,0.6)" />
+          <line className="pn" x1="226" y1="180" x2="338" y2="180" />                                  {/* radius */}
+          <line className="pn" x1="338" y1="174" x2="338" y2="186" />                                  {/* radius end tick */}
+          <line className="pn" x1="226" y1="46" x2="226" y2="40" />                                    {/* top pole tick */}
+          <circle className="pn" cx="226" cy="68" r="2.5" fill="rgba(244,241,234,0.6)" />              {/* pole node */}
         </g>
       </svg>
+      </div>
 
       {/* scroll cue */}
       <div className="mdn-cue" style={{ position: 'absolute', left: '50%', bottom: 22, transform: 'translateX(-50%)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, opacity: 0, zIndex: 4 }}>
