@@ -211,18 +211,3 @@
 /* ============================================================
    REDUCED MOTION: final, lit state. No transforms, no clip rise.
    ============================================================ */
-@media (prefers-reduced-motion: reduce) {
-  .pipe__intro > *,
-  .pipe__i,
-  .pipe__note,
-  .pipe__arrow { opacity: 1 !important; transform: none !important; }
-  .pipe__node { opacity: 1 !important; transform: none !important; }
-  .pipe__word {
-    transform: none !important;
-    opacity: 1 !important;
-    filter: none !important;
-  }
-  .pipe__draw { stroke-dashoffset: 0 !important; }
-  .pipe__steps { --pipe-rail: 1; }
-  .pipe__steps::before { transform: scaleY(1) !important; }
-}

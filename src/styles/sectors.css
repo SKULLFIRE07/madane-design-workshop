@@ -367,16 +367,3 @@
 /* ============================================================
    REDUCED MOTION — clean static final state, no transitions
    ============================================================ */
-@media (prefers-reduced-motion: reduce) {
-  .sx__pimg,
-  .sx__item,
-  .sx__name,
-  .sx__idx,
-  .sx__tick,
-  .sx__big,
-  .sx__progress span {
-    transition: none !important;
-  }
-  .sx__pimg { transform: none !important; }
-  .sx__big.is-on { transform: none !important; opacity: 1 !important; }
-}

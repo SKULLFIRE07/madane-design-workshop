@@ -362,9 +362,6 @@
 }
 
 /* ---- reduced motion / no-pointer: keep it static & legible ---- */
-@media (prefers-reduced-motion: reduce) {
-  .sw-inner { transition: none; }
-}
 
 @media (max-width: 640px) {
   /* phones: let it breathe vertically instead of cramming one screen */

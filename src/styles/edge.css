@@ -345,23 +345,3 @@
    REDUCED MOTION · everything settled, no transforms
    (JS also short-circuits to the static final state)
    ============================================================ */
-@media (prefers-reduced-motion: reduce) {
-  .edge__chapter {
-    position: static;
-    inset: auto;
-    opacity: 1 !important;
-    visibility: visible !important;
-    transform: none !important;
-    clip-path: none !important;
-    will-change: auto;
-    padding-block: clamp(2rem, 5vw, 3rem);
-  }
-  .edge__chapters {
-    position: static;
-    min-height: 0;
-    display: flex;
-    flex-direction: column;
-  }
-  .edge__rail-fill { transform: scaleY(1) !important; }
-  .edge__index li { opacity: 1; }
-}

@@ -36,9 +36,6 @@
 }
 
 /* reduced motion: no idle grain drift */
-@media (prefers-reduced-motion: reduce) {
-  .mdn-grain, .mdn-drop { animation: none; }
-}
 
 /* =======================================================================
    CAD / blueprint underlay · faint architectural line work for the intro

@@ -276,12 +276,6 @@
   .pg__caption { display: none; }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .pg__media img,
-  .pg__media-veil,
-  .pg__media,
-  .pg__arrow { transition: none; }
-}
 /* ============================================================
    PHILOSOPHY REVEAL â€” pinned editorial beat.
    Image left (~55%) parallax + scale settle; text right with
@@ -490,22 +484,3 @@
 }
 
 /* ---- prefers-reduced-motion: snap to final state ---- */
-@media (prefers-reduced-motion: reduce) {
-  .pr__img {
-    transform: none !important;
-  }
-  .pr__text {
-    transform: none !important;
-  }
-  .pr__word {
-    transform: none !important;
-    clip-path: none !important;
-  }
-  .pr__line {
-    transform: scaleX(1) !important;
-  }
-  .pr__body {
-    transform: none !important;
-    opacity: 1 !important;
-  }
-}

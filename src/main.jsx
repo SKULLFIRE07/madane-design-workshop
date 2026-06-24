@@ -1,3 +1,4 @@
+import './force-motion.js' // must run before anything reads prefers-reduced-motion
 import React from 'react'
 import { createRoot } from 'react-dom/client'
 import './styles/global.css'

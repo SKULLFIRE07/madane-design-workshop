@@ -260,10 +260,3 @@
    REDUCED MOTION · everything renders in its final drawn state
    (JS sets it too, but guarantee no half-drawn flash).
    ============================================================ */
-@media (prefers-reduced-motion: reduce) {
-  .gc-line { stroke-dashoffset: 0 !important; }
-  .gc-axis { transform: none !important; }
-  .gc-area, .gc-axis, .gc-grid, .gc-covidline, .gc-vlabel,
-  .gc-dot, .gc-xlabel { opacity: 1 !important; }
-  .gc-end, .gc-covid { opacity: 1 !important; }
-}

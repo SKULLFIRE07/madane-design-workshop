@@ -22,7 +22,6 @@ main { display: block; }
   50%  { transform: translate3d(4%, 3%, 0) scale(1.12) rotate(4deg); }
   100% { transform: translate3d(-2%, 4%, 0) scale(1.06) rotate(-3deg); }
 }
-@media (prefers-reduced-motion: reduce) { .hero__aurora { animation: none; } }
 
 /* ===================== HERO ===================== */
 .hero {
@@ -468,7 +467,6 @@ main { display: block; }
 }
 /* transform-based motion (no per-frame repaint) */
 @keyframes gridslide { from { transform: translate3d(0,0,0); } to { transform: translate3d(60px,60px,0); } }
-@media (prefers-reduced-motion: reduce) { .why__grid-bg { animation: none; } }
 .why__head { margin-bottom: clamp(2.5rem, 6vw, 4.5rem); position: relative; z-index: 2; }
 .why__title { font-size: clamp(2.2rem, 6vw, 5rem); margin-top: 1rem; text-transform: lowercase; }
 .why__rows { position: relative; z-index: 2; }

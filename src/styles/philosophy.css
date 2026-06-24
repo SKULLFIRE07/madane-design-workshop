@@ -383,25 +383,3 @@
    visible state via the CSS rest rules above — just hard-stop any
    transform the legacy rules might apply.
    ============================================================ */
-@media (prefers-reduced-motion: reduce) {
-  .pr__media {
-    clip-path: none !important;
-  }
-  .pr__img,
-  .pr__text {
-    transform: none !important;
-  }
-  .pr__word {
-    transform: none !important;
-    clip-path: none !important;
-  }
-  .pr__line {
-    transform: scaleX(1) !important;
-  }
-  .pr__lede,
-  .pr__body,
-  .pr__tail {
-    transform: none !important;
-    opacity: 1 !important;
-  }
-}
