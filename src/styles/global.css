@@ -3,6 +3,39 @@
    Think to Innovate. Monochrome architecture + electric blue.
    ============================================================ */
 
+/* ---- single typeface: Avant Garde CE (ITC Avant Garde Gothic LT) ----
+   Two real weights ship: Extra Light (200) + Medium (500), each with an
+   oblique. Heavier weights (600–800) fall back to Medium with synthesised
+   bold. Files live in public/assets/fonts/. */
+@font-face {
+  font-family: 'Avant Garde CE';
+  src: url('/assets/fonts/AvantGardeCE-ExtraLight.ttf') format('truetype');
+  font-weight: 200 300;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Avant Garde CE';
+  src: url('/assets/fonts/AvantGardeCE-ExtraLightOblique.ttf') format('truetype');
+  font-weight: 200 300;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Avant Garde CE';
+  src: url('/assets/fonts/AvantGardeCE-Medium.ttf') format('truetype');
+  font-weight: 400 800;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Avant Garde CE';
+  src: url('/assets/fonts/AvantGardeCE-MediumOblique.ttf') format('truetype');
+  font-weight: 400 800;
+  font-style: italic;
+  font-display: swap;
+}
+
 :root {
   /* ---- core palette ---- */
   --ink: #050505;          /* true near-black canvas */
@@ -26,11 +59,13 @@
   --grad-blue: #ffffff;
   --grad-sky: #ffffff;
 
-  /* ---- type: editorial serif display + neutral grotesk + spec mono ---- */
-  --font-display: 'Fraunces', Georgia, 'Times New Roman', serif;
-  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
-  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
-  --font-sanskrit: 'Tiro Devanagari Sanskrit', serif;
+  /* ---- type: single typeface everywhere (Avant Garde CE) ----
+     All four roles collapse to one face. Devanagari kept only as a
+     glyph fallback so the Sanskrit motto doesn't render as tofu. */
+  --font-display: 'Avant Garde CE', 'Century Gothic', sans-serif;
+  --font-sans: 'Avant Garde CE', 'Century Gothic', sans-serif;
+  --font-mono: 'Avant Garde CE', 'Century Gothic', sans-serif;
+  --font-sanskrit: 'Avant Garde CE', 'Tiro Devanagari Sanskrit', sans-serif;
 
   /* ---- spacing / layout ---- */
   --pad-x: clamp(1.5rem, 6vw, 8rem);

@@ -49,7 +49,7 @@
   pointer-events: none;
   opacity: 0;            /* GSAP fades this in during ACQUIRE */
   --cad: rgba(244, 241, 234, 0.5);
-  font-family: 'Space Mono', monospace;
+  font-family: var(--font-mono);
 }
 
 /* fine blueprint grid — minor 40px squares + major 200px squares */

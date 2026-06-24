@@ -397,7 +397,7 @@ export default function HeroIntro({ onComplete, speed = 1.3 }) {
     <div
       className="mdn-intro"
       ref={stageRef}
-      style={{ position: 'fixed', inset: 0, zIndex: 9000, background: PALETTE.bg, fontFamily: "'Space Grotesk', system-ui, sans-serif", color: PALETTE.ink, overflow: 'hidden' }}
+      style={{ position: 'fixed', inset: 0, zIndex: 9000, background: PALETTE.bg, fontFamily: "'Avant Garde CE', 'Century Gothic', sans-serif", color: PALETTE.ink, overflow: 'hidden' }}
       aria-label="Madane Design Workshop intro"
     >
       {/* filters */}
@@ -502,7 +502,7 @@ export default function HeroIntro({ onComplete, speed = 1.3 }) {
 
       {/* scroll cue */}
       <div className="mdn-cue" style={{ position: 'absolute', left: '50%', bottom: 22, transform: 'translateX(-50%)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, opacity: 0, zIndex: 4 }}>
-        <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 10, letterSpacing: '0.4em', textTransform: 'uppercase', color: 'rgba(244,241,234,0.5)' }}>Scroll</div>
+        <div style={{ fontFamily: "'Avant Garde CE', 'Century Gothic', sans-serif", fontSize: 10, letterSpacing: '0.4em', textTransform: 'uppercase', color: 'rgba(244,241,234,0.5)' }}>Scroll</div>
         <div style={{ position: 'relative', width: 1, height: 38, overflow: 'hidden', background: 'rgba(244,241,234,0.12)' }}>
           <div className="mdn-drop" style={{ position: 'absolute', left: 0, top: 0, width: 1, height: 14, background: 'rgba(244,241,234,0.7)' }} />
         </div>
@@ -512,7 +512,7 @@ export default function HeroIntro({ onComplete, speed = 1.3 }) {
       <button
         className="mdn-skip"
         onClick={() => stageRef.current?.__skip?.()}
-        style={{ position: 'absolute', top: 24, right: 26, appearance: 'none', background: 'transparent', border: 'none', cursor: 'pointer', fontFamily: "'Space Mono', monospace", fontSize: 10, letterSpacing: '0.34em', textTransform: 'uppercase', color: 'rgba(244,241,234,0.45)', padding: '8px 10px', zIndex: 7 }}
+        style={{ position: 'absolute', top: 24, right: 26, appearance: 'none', background: 'transparent', border: 'none', cursor: 'pointer', fontFamily: "'Avant Garde CE', 'Century Gothic', sans-serif", fontSize: 10, letterSpacing: '0.34em', textTransform: 'uppercase', color: 'rgba(244,241,234,0.45)', padding: '8px 10px', zIndex: 7 }}
       >Skip</button>
 
       {/* vignette */}
